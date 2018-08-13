@@ -1,12 +1,14 @@
 var webRestApp = angular.module('webRestApp',['ngRoute']);
 
 webRestApp.run(function($rootScope){
-  $rootScope.YouUser={
-    username:"",
-    password:"",
-    uType:-1
+  $rootScope.Singleton={
+    YouUser:{
+      username:"",
+      password:"",
+      uType:-1
+    }
   };
-  console.log('run rootscope: '+'username: '+$rootScope.YouUser.username+'|password: '+$rootScope.YouUser.password+'|uType: '+$rootScope.YouUser.uType);
+  console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
 });
 
 webRestApp.config(['$routeProvider',function($routeProvider){
@@ -43,13 +45,13 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   var urlBase = 'http://localhost:8080/RESTApp/rest';
 
   service.overrideCurrentUser = function(userDataObject){
-    $rootScope.YouUser=userDataObject;
-    console.log('OVERRIDDEN: '+'username: '+$rootScope.YouUser.username+'|password: '+$rootScope.YouUser.password+'|uType: '+$rootScope.YouUser.uType);
+    $rootScope.Singleton.YouUser=userDataObject;
+    console.log('OVERRIDDEN: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
   };
 
   service.copyCurrentuser = function(){
-    console.log('COPY CURRENT USER: '+'username: '+$rootScope.YouUser.username+'|password: '+$rootScope.YouUser.password+'|uType: '+$rootScope.YouUser.uType);
-    return $rootScope.YouUser;
+    console.log('COPY CURRENT USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
+    return $rootScope.Singleton.YouUser;
   };
 
   service.getCurrentUser = function(){
@@ -85,8 +87,8 @@ webRestApp.run(function(){
 webRestApp.controller('HeaderController',['$scope', '$http','$rootScope','userConfig',function($scope, $http, $rootScope, userConfig){
   $scope.currentuser={};
 
-  $scope.$watch('$root.YouUser',function(){
-    $scope.currentuser=$rootScope.YouUser;
+  $scope.$watch('$root.Singleton.YouUser',function(){
+    $scope.currentuser=$rootScope.Singleton.YouUser;
     $scope.refreshHeader();
   });
 
@@ -117,8 +119,8 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
   $scope.currentuser={};
   $scope.homeMessage="Please log in!";
 
-  $scope.$watch('$root.YouUser',function(){
-    $scope.currentuser=$rootScope.YouUser;
+  $scope.$watch('$root.Singleton.YouUser',function(){
+    $scope.currentuser=$rootScope.Singleton.YouUser;
     $scope.refreshHomeMessage();
   });
 
@@ -165,7 +167,7 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
       userConfig.getCurrentUser().then(function(response){
         userConfig.overrideCurrentUser(response.data);
         console.log('LOGGED IN USER RAW: '+angular.toJson(response.data));
-        console.log('LOGGED IN USER: '+'username: '+$rootScope.YouUser.username+'|password: '+$rootScope.YouUser.password+'|uType: '+$rootScope.YouUser.uType);
+        console.log('LOGGED IN USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
       });
 
       $scope.redirect=userConfig.getHomeRedirectPath();
@@ -206,7 +208,7 @@ webRestApp.controller('LogoutController',['$scope','$http','$rootScope', '$windo
   };
   var init = function(){
     userConfig.logout().then(function(response){
-      $rootScope.YouUser=$scope.userTemplate;
+      $rootScope.Singleton.YouUser=$scope.userTemplate;
       console.log('User successfully logged out!');
     });
   }
