@@ -1,4 +1,4 @@
-var webRestApp = angular.module('webRestApp',['ngRoute']);
+var webRestApp = angular.module('webRestApp',['ngRoute','ngAnimate']);
 
 webRestApp.run(function($rootScope){
   $rootScope.Singleton={
