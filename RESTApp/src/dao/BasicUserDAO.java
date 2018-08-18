@@ -67,4 +67,5 @@ public class BasicUserDAO {
 			return false;
 		}
 	}
+	
 }

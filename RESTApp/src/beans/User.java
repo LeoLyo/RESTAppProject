@@ -4,8 +4,10 @@ public class User {
 	private String username;
 	private String password;
 	private int uType = 0;
+	private boolean activated = false;
 	private boolean deleted = false;
-
+	
+	
 	public boolean isDeleted() {
 		return deleted;
 	}
@@ -25,6 +27,7 @@ public class User {
 		super();
 		this.username = username;
 		this.password = password;
+		
 	}
 
 
@@ -47,6 +50,16 @@ public class User {
 
 	public void setuType(int uType) {
 		this.uType = uType;
+	}
+
+
+	public boolean isActivated() {
+		return activated;
+	}
+
+
+	public void setActivated(boolean activated) {
+		this.activated = activated;
 	}
 
 	

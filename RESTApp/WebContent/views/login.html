@@ -1,8 +1,14 @@
 <div class="content">
   <h1>Login Page</h1>
-  <form ng-submit="loginUser()">
-    <input type="text" ng-model="probableuser.username" placeholder="Enter username"/>
-    <input type="password" ng-model="probableuser.password" placeholder="Enter password"/>
-    <input type="submit" value="Login">
+  <form  name="loginForm" ng-submit="loginUser()" novalidate>
+    <input type="text" name="loginUsername" ng-model="probableuser.username" placeholder="Enter username" ng-required="true"/>
+    <div ng-show="loginForm.loginUsername.$touched && loginForm.loginUsername.$invalid">
+      <small style="color: red; display: block; text-align: center;">Enter a valid username</small>
+    </div>
+    <input type="password" name="loginPassword" ng-model="probableuser.password" placeholder="Enter password" ng-required="true"/>
+    <div ng-show="loginForm.loginPassword.$touched && loginForm.loginPassword.$invalid">
+      <small style="color: red; display: block; text-align: center;">Enter a valid password</small>
+    </div>
+    <input type="submit" value="Login" ng-disabled="loginForm.$invalid">
   </form>
 </div>

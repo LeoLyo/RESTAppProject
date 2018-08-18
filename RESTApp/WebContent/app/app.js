@@ -5,7 +5,8 @@ webRestApp.run(function($rootScope){
     YouUser:{
       username:"",
       password:"",
-      uType:-1
+      uType:-1,
+      activated:true
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -33,6 +34,16 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   .when('/add_operator',{
     templateUrl: 'views/add_operator.html',
     controller: 'AddOperatorController'
+  })
+  .when('/verification_successful/:userForVerification',{
+    templateUrl:'views/verification_successful.html',
+    controller: 'VerificationSuccessfulController'
+  })
+  .when('/waiting_for_validation',{
+    templateUrl: 'views/waiting_for_validation.html'
+  }).when('/test',{
+    templateUrl: 'views/test.html',
+    controller: 'TestController'
   }).otherwise({
     redirectTo:'/home'
   });
@@ -43,7 +54,6 @@ webRestApp.config(['$routeProvider',function($routeProvider){
 webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScope){
   var service = {};
   var urlBase = 'http://localhost:8080/RESTApp/rest';
-
   service.overrideCurrentUser = function(userDataObject){
     $rootScope.Singleton.YouUser=userDataObject;
     console.log('OVERRIDDEN: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -56,6 +66,10 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
 
   service.getCurrentUser = function(){
     return $http.get(urlBase+'/user');
+  };
+
+  service.verifyUser = function(){
+    return $http.put(urlBase+'/verify');
   };
 
   service.register = function(rUser){
@@ -73,6 +87,10 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
 
   service.getHomeRedirectPath = function(){
     return '#!/home.html';
+  }
+
+  service.getWaitingForValidationRedirectPath = function(){
+    return '#!/waiting_for_validation.html';
   }
 
   return service;
@@ -115,7 +133,7 @@ webRestApp.controller('HeaderController',['$scope', '$http','$rootScope','userCo
 }]);
 
 
-webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfig',function($scope, $http, $rootScope, userConfig){
+webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
   $scope.currentuser={};
   $scope.homeMessage="Please log in!";
 
@@ -123,6 +141,16 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
     $scope.currentuser=$rootScope.Singleton.YouUser;
     $scope.refreshHomeMessage();
   });
+
+  $scope.init = function(){
+    if(!$rootScope.Singleton.YouUser.activated){
+
+      $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
+      console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
+      $window.location.href = $scope.notActivatedRedirect;
+      console.log('Waiting For Validation redirected successfully!');
+    }
+  }
 
   $scope.presentUser=function(){
     userConfig.getCurrentUser().then(function(response){
@@ -149,10 +177,13 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
       console.log("HOME REFRESH INIT: "+'username: '+$scope.currentuser.username+'|password: '+$scope.currentuser.password+'|uType: '+$scope.currentuser.uType);
   };
 
+  $scope.init();
+
 }]);
 
 
 webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window', 'userConfig',function($scope, $http, $rootScope, $window, userConfig){
+
   $scope.loginUser=function(){
     $scope.logintrialuser={
       username: $scope.probableuser.username,
@@ -161,7 +192,7 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
     $scope.probableuser.username="";
     $scope.probableuser.password="";
 
-    var formatedUser=JSON.stringify($scope.logintrialuser);
+    var formatedUser=angular.toJson($scope.logintrialuser);
     console.log(formatedUser);
     userConfig.login(formatedUser).then(function(formatedUser,status){
       userConfig.getCurrentUser().then(function(response){
@@ -176,6 +207,17 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
       console.log('Login manifested successfully!');
     });
    };
+
+   $scope.init = function(){
+     if(!$rootScope.Singleton.YouUser.activated){
+
+       $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
+       console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
+       $window.location.href = $scope.notActivatedRedirect;
+       console.log('Waiting For Validation redirected successfully!');
+     }
+   }
+   $scope.init();
 }]);
 
 
@@ -200,11 +242,12 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig',funct
   };
 }]);
 
-webRestApp.controller('LogoutController',['$scope','$http','$rootScope', '$window', 'userConfig',function($scope, $http, $rootScope, $window, userConfig){
+webRestApp.controller('LogoutController',['$scope','$http','$rootScope', 'userConfig',function($scope, $http, $rootScope, userConfig){
   $scope.userTemplate={
     username:"",
     password:"",
-    uType:-1
+    uType:-1,
+    activated:true
   };
   var init = function(){
     userConfig.logout().then(function(response){
@@ -221,4 +264,38 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
   $scope.addOperator=function(){
 
   };
+}]);
+
+webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$rootScope','userConfig','$routeParams', function($scope,$http,$rootscope,userConfig, $routeParams){
+
+  $scope.verifiedUser = $routeParams.userForVerification;
+  console.log("VERIFIED USER: "+$scope.verifiedUser);
+
+
+  /*
+  $scope.verifiedUser = userConfig.copyCurrentuser();
+  $scope.verifiedUser.activated=true;
+  userConfig.overrideCurrentUser($scope.verifiedUser);
+  userConfig.validateUser($scope.verifiedUser).then(function(verifiedUser,status){
+    userconfig.getCurrentUser().then(function(response){
+      userconfig.overrideCurrentUser(response.data);
+      console.log('User activated successfully!');
+    });
+    console.log('Email activation successful!');
+  });*/
+}]);
+
+webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig',function($scope, $http, $rootScope, userConfig){
+
+  $scope.init = function(){
+    if(!$rootScope.Singleton.YouUser.activated){
+
+      $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
+      console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
+      $window.location.href = $scope.notActivatedRedirect;
+      console.log('Waiting For Validation redirected successfully!');
+    }
+  }
+
+  $scope.init();
 }]);

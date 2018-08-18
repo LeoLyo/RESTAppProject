@@ -1,10 +1,10 @@
 <div class="content">
   <h1>Register Page</h1>
-  <form ng-submit="registerUser()">
-    <input type="text" ng-model="userbeingregistered.username" placeholder="Enter username"/>
-    <input type="email" ng-model="userbeingregistered.email" placeholder="Enter email"/>
-    <input type="password" ng-model="userbeingregistered.password" placeholder="Enter password"/>
-    <input type="text" ng-model="userbeingregistered.country" placeholder="Enter country"/>
+  <form name="regsiterForm" ng-submit="registerUser()" novalidate>
+    <input type="text" ng-model="userbeingregistered.username" placeholder="Enter username" ng-required="true"/>
+    <input type="email" ng-model="userbeingregistered.email" placeholder="Enter email" ng-required="true"/>
+    <input type="password" ng-model="userbeingregistered.password" placeholder="Enter password" ng-required="true"/>
+    <input type="text" ng-model="userbeingregistered.country" placeholder="Enter country" ng-required="true"/>
     <input type="submit" value="Register">
   </form>
 </div>

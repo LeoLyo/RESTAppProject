@@ -68,6 +68,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
+		System.out.println("CONTEXT INITIALIZED");
 		ObjectMapper mapper = new ObjectMapper();
 		ServletContext ctx = arg0.getServletContext();
 
@@ -109,10 +110,13 @@ public class Listener implements javax.servlet.ServletContextListener {
 			} else {
 				ctx.setAttribute("photoDAO", new PhotoDAO());
 			}
+			
+			System.out.println("REGISTER TESTING FROM DATABASE IN LISTENER: "+data.getuDAO().find("pujomir"));
 
 		} catch (JsonParseException e) {
 			e.printStackTrace();
 			ctx.setAttribute("userDAO", new BasicUserDAO());
+			System.out.println("Json parse exception");
 
 			AdminDAO aDAO = new AdminDAO();
 			aDAO.add(new Admin("admin", "admin"));
@@ -123,7 +127,8 @@ public class Listener implements javax.servlet.ServletContextListener {
 		} catch (JsonMappingException e) {
 			e.printStackTrace();
 			ctx.setAttribute("userDAO", new BasicUserDAO());
-
+			System.out.println("Json mapping exception");
+			
 			AdminDAO aDAO = new AdminDAO();
 			aDAO.add(new Admin("admin", "admin"));
 
@@ -132,9 +137,9 @@ public class Listener implements javax.servlet.ServletContextListener {
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 		} catch (IOException e) {
 			e.printStackTrace();
-
 			ctx.setAttribute("userDAO", new BasicUserDAO());
-
+			System.out.println("io exception");
+			
 			AdminDAO aDAO = new AdminDAO();
 			aDAO.add(new Admin("admin", "admin"));
 
@@ -143,6 +148,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 
 		}
+		
 
 	}
 
