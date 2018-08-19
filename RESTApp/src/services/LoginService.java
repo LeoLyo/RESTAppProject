@@ -1,9 +1,10 @@
 package services;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Formatter;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -114,12 +115,15 @@ public class LoginService {
 			
 			/*sendConfirmationMail(ud.getEmail());*/
 			try {
-				final Formatter formatter = new Formatter("verification_for_"+ud.getUsername().toLowerCase()+".txt");
-				formatter.format("%s", "http://localhost:8080/RESTApp/#!/verification_successful/"+ud.getUsername().toLowerCase());
-				formatter.close();
+				String path="C:\\Users\\Anagnosti\\Desktop\\Database\\Verification_Files\\verification_for_"+ud.getUsername().toLowerCase()+".txt";
+				PrintWriter writer = new PrintWriter(new File(path), "UTF-8");
+				String message="http://localhost:8080/RESTApp/#!/verification_successful/"+ud.getUsername().toLowerCase();
+				writer.print(message);
+				System.out.println("Verification file for "+ud.getUsername().toLowerCase()+" has been created.");
+				writer.close();
 			}
 			catch (Exception e) {
-				System.out.println("Error creating verification file. for user "+ud.getUsername().toLowerCase());
+				System.out.println("Error creating verification file. for user "+ud.getUsername().toLowerCase()+e);
 			}
 			System.out.println("REGISTER TESTING FROM FRONTEND: "+"username: "+ud.getUsername()+"|email: "+ud.getEmail()+"|password: "+ud.getPassword()+"|country: "+ud.getCountry());
 			return Response.ok(nUser).build();
@@ -252,6 +256,8 @@ public class LoginService {
 		}
 	}
 	
+	//NEEDS FIXING ??
+	
 	@PUT
 	@Path("/verify")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -259,15 +265,13 @@ public class LoginService {
 	public Response verifyUser(User us, @Context HttpServletRequest request) {
 		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
 		User target = dao.find(us.getUsername());
-		User current = (User) request.getSession().getAttribute("user");
-
-		if (! (current.getuType() == 0)) {
+		
+		if (! (target.getuType() == 0)||target==null) {
 			return Response.status(400).build();
 		}
-		if (target == null) {
-			return Response.status(400).build();
-		} else {
+		 else {
 			target.setActivated(true);
+			System.out.println("RAK IS GOD: " + target.getUsername()+", "+target.getPassword()+", "+target.getuType()+", "+target.isActivated());
 			return Response.status(200).build();
 
 		}

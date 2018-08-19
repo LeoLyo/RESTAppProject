@@ -41,7 +41,8 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   })
   .when('/waiting_for_validation',{
     templateUrl: 'views/waiting_for_validation.html'
-  }).when('/test',{
+  })
+  .when('/test',{
     templateUrl: 'views/test.html',
     controller: 'TestController'
   }).otherwise({
@@ -68,8 +69,8 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
     return $http.get(urlBase+'/user');
   };
 
-  service.verifyUser = function(){
-    return $http.put(urlBase+'/verify');
+  service.verifyUser = function(vUser){
+    return $http.put(urlBase+'/verify',vUser);
   };
 
   service.register = function(rUser){
@@ -86,7 +87,7 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
 /*Redirect paths*/
 
   service.getHomeRedirectPath = function(){
-    return '#!/home.html';
+    return '#!/test.html';
   }
 
   service.getWaitingForValidationRedirectPath = function(){
@@ -210,7 +211,6 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
 
    $scope.init = function(){
      if(!$rootScope.Singleton.YouUser.activated){
-
        $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
        console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
        $window.location.href = $scope.notActivatedRedirect;
@@ -221,7 +221,7 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
 }]);
 
 
-webRestApp.controller('RegisterController',['$scope','$http', 'userConfig',function($scope,$http, userConfig){
+webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$window', function($scope,$http, userConfig, $window){
   $scope.registerUser=function(){
     $scope.newuser={
       username: $scope.userbeingregistered.username,
@@ -236,8 +236,13 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig',funct
 
     var formatedUser=angular.toJson($scope.newuser);
     userConfig.register(formatedUser).then(function(formatedUser,status){
-
       console.log('New user registered successfully!');
+
+      //REDIRECTION NEEDS FIXING
+      $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
+      console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
+      $window.location.href = $scope.notActivatedRedirect;
+      console.log('Waiting For Validation redirected successfully!');
     });
   };
 }]);
@@ -267,9 +272,20 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
 }]);
 
 webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$rootScope','userConfig','$routeParams', function($scope,$http,$rootscope,userConfig, $routeParams){
-
-  $scope.verifiedUser = $routeParams.userForVerification;
-  console.log("VERIFIED USER: "+$scope.verifiedUser);
+  $scope.verifiedUser={
+    username:$routeParams.userForVerification,
+    password:"temp",
+    uType:"-1",
+  };
+  $scope.title="ERROR VERIFYING ACCOUNT";
+  $scope.message="Random error occurred..."
+  var formatedUser=angular.toJson($scope.verifiedUser);
+  userConfig.verifyUser(formatedUser).then(function(usernameOfVerifiedUser, status){
+    console.log("User "+$scope.verifiedUser.username + " verified successfully!")
+    $scope.title="ACCOUNT SUCCESSFULLY VERIFIED";
+    $scope.message="Thank you for verifying your account: "+$scope.verifiedUser.username+"! You are now eligible to use the website functions that have been prepared for people like you. Enjoy! ^_^";
+  //console.log("YOYO "+ usernameOfVerifiedUser+" | "+$scope.verifiedUser.username);
+  });
 
 
   /*
@@ -285,7 +301,7 @@ webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$roo
   });*/
 }]);
 
-webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig',function($scope, $http, $rootScope, userConfig){
+webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
 
   $scope.init = function(){
     if(!$rootScope.Singleton.YouUser.activated){

@@ -6,10 +6,13 @@ import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_es;
 
 import beans.Admin;
 import dao.AdminDAO;
@@ -45,7 +48,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 		}
 
 		// String path = arg0.getServletContext().getRealPath("/") + "data.json";
-		String path = "C:\\Users\\Anagnosti\\Desktop\\Front End\\data\\" + "data.json";
+		String path = "C:\\Users\\Anagnosti\\Desktop\\Database\\Data\\" + "data.json";
 		ObjectMapper mapper = new ObjectMapper();
 
 		// SimpleModule simpleModule = new SimpleModule();
@@ -68,6 +71,13 @@ public class Listener implements javax.servlet.ServletContextListener {
 
 	@Override
 	public void contextInitialized(ServletContextEvent arg0) {
+		try {
+			FileUtils.cleanDirectory(new File("C:\\Users\\Anagnosti\\Desktop\\Database\\Verification_Files"));
+			System.out.println("Validation files cleaned.");
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			System.out.println("Error deleting verification files "+e1);
+		}
 		System.out.println("CONTEXT INITIALIZED");
 		ObjectMapper mapper = new ObjectMapper();
 		ServletContext ctx = arg0.getServletContext();
@@ -77,7 +87,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 		// mapper.registerModule(simpleModule);
 
 		// String path = arg0.getServletContext().getRealPath("/") + "data.json";
-		String path = "C:\\Users\\Anagnosti\\Desktop\\Front End\\data\\" + "data.json";
+		String path = "C:\\Users\\Anagnosti\\Desktop\\Database\\Data\\" + "data.json";
 
 		try {
 			DAOData data = mapper.readValue(new File(path), DAOData.class);
