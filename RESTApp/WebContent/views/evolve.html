@@ -1,0 +1,10 @@
+<div class="content">
+  <h1>Welcome to the Evolving (Testing) Phase</h1>
+  <form name="testPicsForm" ng-submit="evolveUser()" novalidate>
+    <label for="pictureUploadInput">Picture for evolving (testing)</label>
+    <input type="file" id="pictureUploadInput" accept="image/*" file-input="files" multiple/>
+    <input type="submit" value="Attach">
+    <h4>{{pictureMessage}}</h4>
+    <li ng-repeat="file in files">{{file.name}}</li>
+  </form>
+</div>

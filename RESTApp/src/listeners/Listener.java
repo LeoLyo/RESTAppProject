@@ -15,6 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_es;
 
 import beans.Admin;
+import beans.BasicUser;
 import dao.AdminDAO;
 import dao.BasicUserDAO;
 import dao.DAOData;
@@ -93,9 +94,16 @@ public class Listener implements javax.servlet.ServletContextListener {
 			DAOData data = mapper.readValue(new File(path), DAOData.class);
 
 			if (data.getuDAO() != null) {
+				if (data.getuDAO().findAll().isEmpty()) {
+					data.getuDAO().add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
+					data.getuDAO().find("rakomir").setActivated(true);
+				}
 				ctx.setAttribute("userDAO", data.getuDAO());
 			} else {
-				ctx.setAttribute("userDAO", new BasicUserDAO());
+				BasicUserDAO uDAO = new BasicUserDAO();
+				uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
+				uDAO.find("rakomir").setActivated(true);
+				ctx.setAttribute("userDAO", uDAO);
 			}
 
 			if (data.getaDAO() != null) {
@@ -125,35 +133,50 @@ public class Listener implements javax.servlet.ServletContextListener {
 
 		} catch (JsonParseException e) {
 			e.printStackTrace();
-			ctx.setAttribute("userDAO", new BasicUserDAO());
+			
+			BasicUserDAO uDAO = new BasicUserDAO();
+			uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
+			uDAO.find("rakomir").setActivated(true);
+			ctx.setAttribute("userDAO", uDAO);
+			
 			System.out.println("Json parse exception");
 
 			AdminDAO aDAO = new AdminDAO();
 			aDAO.add(new Admin("admin", "admin"));
-
 			ctx.setAttribute("adminDAO", aDAO);
+			
 			ctx.setAttribute("operatorDAO", new OperatorDAO());
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 		} catch (JsonMappingException e) {
 			e.printStackTrace();
-			ctx.setAttribute("userDAO", new BasicUserDAO());
+			
+			BasicUserDAO uDAO = new BasicUserDAO();
+			uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
+			uDAO.find("rakomir").setActivated(true);
+			ctx.setAttribute("userDAO", uDAO);
+			
 			System.out.println("Json mapping exception");
 			
 			AdminDAO aDAO = new AdminDAO();
 			aDAO.add(new Admin("admin", "admin"));
-
 			ctx.setAttribute("adminDAO", aDAO);
+			
 			ctx.setAttribute("operatorDAO", new OperatorDAO());
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 		} catch (IOException e) {
 			e.printStackTrace();
-			ctx.setAttribute("userDAO", new BasicUserDAO());
+			
+			BasicUserDAO uDAO = new BasicUserDAO();
+			uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
+			uDAO.find("rakomir").setActivated(true);
+			ctx.setAttribute("userDAO", uDAO);
+			
 			System.out.println("io exception");
 			
 			AdminDAO aDAO = new AdminDAO();
 			aDAO.add(new Admin("admin", "admin"));
-
 			ctx.setAttribute("adminDAO", aDAO);
+			
 			ctx.setAttribute("operatorDAO", new OperatorDAO());
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 

@@ -35,6 +35,10 @@ webRestApp.config(['$routeProvider',function($routeProvider){
     templateUrl: 'views/add_operator.html',
     controller: 'AddOperatorController'
   })
+  .when('/evolve', {
+    templateUrl: 'views/evolve.html',
+    controller: 'EvolveController'
+  })
   .when('/verification_successful/:userForVerification',{
     templateUrl:'views/verification_successful.html',
     controller: 'VerificationSuccessfulController'
@@ -44,8 +48,9 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   })
   .when('/test',{
     templateUrl: 'views/test.html',
-    controller: 'TestController'
-  }).otherwise({
+    controller: 'UpgradeTestingController'
+  })
+  .otherwise({
     redirectTo:'/home'
   });
 
@@ -97,11 +102,55 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   return service;
 }]);
 
+//IMAGE UPLOAD DIRECTIVE
 
-webRestApp.run(function(){
+webRestApp.directive('fileInput',['$parse',function($parse){
+  return{
+    restrict:'A',
+    link:function(scope,elm,attrs){
+      elm.bind('change',function(){
+        $parse(attrs.fileInput).assign(scope,elm[0].files)
+        scope.$apply()
+      })
+    }
+  }
+}])
 
-});
 
+/*
+webRestApp.directive('fileModel',['$parse','$scope',function($parse,$scope){
+  return{
+    restrict: 'A',
+    link: function(scope,element, attrs){
+      var model = $parse(attrs.fileModel);
+      var modelSetter = model.assign;
+
+      element.bind('change', function(){
+        scope.$apply(function(){
+          modelSetter(scope,element[0].files[0]);
+        });
+      });
+      $scope.picture.file;
+      console.log("BIUBI: "+$scope.picture.file);
+    }
+  }
+}])
+
+webRestApp.service('multipartForm',['$http', function($http){
+  this.post=function(uploadUrl, data){
+    var fd = new FormData();
+    for(var key in data){
+      fd.append(key,data[key]); //Take every element of picture and put it into the form as a key and then take the value of every element of picture and put it in as a value for that key.
+      $http.post(uploadUrl, fd, {
+        transformRequest: angular.identity,
+        headers: { 'Content-Type': undefined }
+      })
+    }
+  }
+}])
+
+*/
+//CONTROLLERS
 
 webRestApp.controller('HeaderController',['$scope', '$http','$rootScope','userConfig',function($scope, $http, $rootScope, userConfig){
   $scope.currentuser={};
@@ -271,6 +320,36 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
   };
 }]);
 
+
+
+
+webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+
+  $scope.pictureArray=[];
+  $scope.counter=0;
+  console.log("RAKOMIR ALMIGHTY");
+
+  $scope.evolveUser = function(){
+    console.log("ENETERED ATTACHING EVOLUTION");
+    var reader = new FileReader();
+    angular.forEach($sope.files, function(file){
+      $scope.counter++;
+      reader.addEventListener("load",function(){
+        var image = new Image();
+        image.src=reader.result;
+        console.log("Something: " + image + " | " + image.height + " | " + image.width);
+      },false);
+      if(file){
+        reader.readAsDataURL(file);
+      }
+    })
+  };
+}]);
+
+
+
+
+
 webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$rootScope','userConfig','$routeParams', function($scope,$http,$rootscope,userConfig, $routeParams){
   $scope.verifiedUser={
     username:$routeParams.userForVerification,
@@ -301,11 +380,59 @@ webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$roo
   });*/
 }]);
 
+webRestApp.controller('UpgradeTestingController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+  console.log("LOVE IS LIFE");
+}]);
+
 webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+  $scope.pictureArray=[];
+  $scope.counter=0;
+  console.log("RAKOMIR ALMIGHTY");
+
+  $scope.upload = function(){
+    console.log("ENETERED UPLOAD");
+    var reader = new FileReader();
+    angular.forEach($sope.files, function(file){
+      $scope.counter++;
+      reader.addEventListener("load",function(){
+        var image = new Image();
+        image.src=reader.result;
+        console.log("Something: " + image + " | " + image.height + " | " + image.width);
+      },false);
+      if(file){
+        reader.readAsDataURL(file);
+      }
+    })
+  };
+
+/*
+$scope.pictureArray=[];
+$scope.openFile = function(file){
+    $scope.input = file.target;
+    var reader = new FileReader();
+    console.log("ENETERED OPENFILE");
+    reader.onload = function(){
+      var dataURL=reader.result;
+      console.log("DATAUR: "+dataURL);
+      var image = new Image();
+      image.src=dataURL;
+      image.onload=function(){
+        console.log("HEIGHT: "+image.height+" | WIDTH: "+image.width);
+      }
+    };
+    reader.readAsDataURL(input.files[0]);
+    console.log("READ AS DATA URL: " + reader.result);
+}
+
+$scope.upload = function(){
+
+}
+
+*/
 
   $scope.init = function(){
+    console.log("TEST INIT");
     if(!$rootScope.Singleton.YouUser.activated){
-
       $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
       console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
       $window.location.href = $scope.notActivatedRedirect;
