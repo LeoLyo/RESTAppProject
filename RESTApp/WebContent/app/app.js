@@ -324,23 +324,48 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
 
 
 webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
-
+  
+  $scope.imageMessage="BLAA";
   $scope.pictureArray=[];
   $scope.counter=0;
   console.log("RAKOMIR ALMIGHTY");
 
   $scope.evolveUser = function(){
     console.log("ENETERED ATTACHING EVOLUTION");
-    var reader = new FileReader();
-    angular.forEach($sope.files, function(file){
+    angular.forEach($scope.files, function(file){
+
+      var breader = new FileReader();
+      var reader = new FileReader();
+
       $scope.counter++;
+
       reader.addEventListener("load",function(){
+
         var image = new Image();
         image.src=reader.result;
-        console.log("Something: " + image + " | " + image.height + " | " + image.width);
+        breader.onload = function(){
+          var arrayBuffer = breader.result;
+          $scope.array = new Uint8Array(arrayBuffer);
+          $scope.len = $scope.array.byteLength;
+          $scope.binary='';
+          for(var i=0;i<$scope.len;i++){
+            $scope.binary+=String.fromCharCode($scope.array[i]);
+          }
+
+          //$scope.binaryString = String.fromCharCode.apply(null,$scope.array);
+          //console.log("BYTE ARRAY: " + $scope.binaryString);
+          console.log("NEW BYTE ARRAY: "+$scope.binary);
+          $scope.imageBA=window.btoa($scope.binary);
+
+        }
+        image.onload=function(){
+          console.log("ENTERED ONLOAD OF IMAGE");
+          console.log("AOA: " + file.name + " | " + image.height + " | " + image.width);
+        }
       },false);
       if(file){
         reader.readAsDataURL(file);
+        breader.readAsArrayBuffer(file);
       }
     })
   };
@@ -392,16 +417,16 @@ webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfi
   $scope.upload = function(){
     console.log("ENETERED UPLOAD");
     var reader = new FileReader();
-    angular.forEach($sope.files, function(file){
-      $scope.counter++;
-      reader.addEventListener("load",function(){
-        var image = new Image();
-        image.src=reader.result;
-        console.log("Something: " + image + " | " + image.height + " | " + image.width);
-      },false);
+    angular.forEach($scope.files, function(file){
       if(file){
         reader.readAsDataURL(file);
       }
+      reader.addEventListener("load",function(){
+        var image = new Image();
+        image.src=reader.result;
+        console.log("NOTHING: " + image.src + " | " + image.height + " | " + image.width);
+      },false);
+
     })
   };
 
