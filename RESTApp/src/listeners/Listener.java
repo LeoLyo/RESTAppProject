@@ -12,6 +12,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_es;
 
 import beans.Admin;
@@ -19,6 +20,7 @@ import beans.BasicUser;
 import dao.AdminDAO;
 import dao.BasicUserDAO;
 import dao.DAOData;
+import dao.FirmDAO;
 import dao.OperatorDAO;
 import dao.PhotoDAO;
 
@@ -31,6 +33,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 		OperatorDAO oDAO = (OperatorDAO) ctx.getAttribute("operatorDAO");
 		PhotoDAO pDAO = (PhotoDAO) ctx.getAttribute("photoDAO");
 		BasicUserDAO uDAO = (BasicUserDAO) ctx.getAttribute("userDAO");
+		FirmDAO fDAO = (FirmDAO) ctx.getAttribute("firmDAO");
 
 		if (aDAO == null) {
 			aDAO = new AdminDAO();
@@ -47,6 +50,9 @@ public class Listener implements javax.servlet.ServletContextListener {
 		if (uDAO == null) {
 			uDAO = new BasicUserDAO();
 		}
+		if (fDAO == null){
+			fDAO = new FirmDAO();
+		}
 
 		// String path = arg0.getServletContext().getRealPath("/") + "data.json";
 		String path = "C:\\Users\\Anagnosti\\Desktop\\Database\\Data\\" + "data.json";
@@ -56,7 +62,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 		// simpleModule.addKeyDeserializer(Article.class, new ArticleKeyDeserializer());
 		// mapper.registerModule(simpleModule);
 
-		DAOData data = new DAOData(aDAO, oDAO, pDAO, uDAO);
+		DAOData data = new DAOData(aDAO, oDAO, pDAO, uDAO, fDAO);
 		System.out.println(data.getaDAO().findAll());
 
 		try {
@@ -127,6 +133,12 @@ public class Listener implements javax.servlet.ServletContextListener {
 				ctx.setAttribute("photoDAO", data.getpDAO());
 			} else {
 				ctx.setAttribute("photoDAO", new PhotoDAO());
+			}
+			
+			if (data.getfDAO() != null) {
+				ctx.setAttribute("firmDAO", data.getfDAO());
+			} else {
+				ctx.setAttribute("firmDAO", new FirmDAO());
 			}
 			
 			System.out.println("REGISTER TESTING FROM DATABASE IN LISTENER: "+data.getuDAO().find("pujomir"));

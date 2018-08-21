@@ -21,11 +21,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import beans.BasicUser;
+import beans.Firm;
 import beans.Operator;
+import beans.Photo;
 import beans.User;
 import dao.AdminDAO;
 import dao.BasicUserDAO;
+import dao.FirmDAO;
 import dao.OperatorDAO;
+import dao.PhotoDAO;
 
 
 @Path("")
@@ -35,7 +39,15 @@ public class LoginService {
 	ServletContext ctx;
 	String contextPath;
 
-
+	/* -1 : unknown
+		0: normal user
+		1: seller
+		2: operator
+		3: admin
+		4: firm 
+	 */
+	
+	
 	public LoginService() {
 
 	}
@@ -296,6 +308,140 @@ public class LoginService {
 
 	}
 
+	//ADD THIS TO RAK'S TURTLE COLLECTION
+	//ALL HAIL RAK
+	@PUT
+	@Path("/photo")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getPhoto(Photo ph, @Context HttpServletRequest request) {
+		PhotoDAO dao = (PhotoDAO) ctx.getAttribute("photoDAO");
+		Photo photo = dao.find(ph.getId(),ph.getByteArray());
+		
+		if (photo==null) {
+			return Response.status(400).build();
+		}
+		 else {
+			return Response.ok(photo).build();
+
+		}
+	}
+
+	@DELETE
+	@Path("/delete-photo")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deletePhoto(Photo ph, @Context HttpServletRequest request) {
+		PhotoDAO dao = (PhotoDAO) ctx.getAttribute("photoDAO");
+		BasicUserDAO udao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		Photo photo = dao.find(ph.getId(),ph.getByteArray());
+
+		BasicUser current = (BasicUser) request.getSession().getAttribute("user");
+		BasicUser seller = udao.find(current.getUsername());
+
+		if(seller == null) {
+			return Response.status(400).build();			
+		}
+		if (photo==null) {
+			return Response.status(400).build();
+		}
+		 else {
+
+		 	if(current.owns(photo)) {
+		 		dao.remove(photo.getId());
+		 		current.removePhoto(photo.getId());
+				return Response.ok().build();
+		 	}
+
+			return Response.status(400).build();
+
+		}
+	}
+
+
+	@GET
+	@Path("/firms")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getFirms(@Context HttpServletRequest request) {
+		User current = (User) request.getSession().getAttribute("user");
+
+		if (current == null) {
+			return Response.status(400).build();
+		}
+
+		if (current.getuType() == 2 || current.getuType() == 3) {
+			return Response.ok(((FirmDAO) ctx.getAttribute("firmDAO")).findAll()).build();
+		} else {
+			return Response.status(400).build();
+		}
+
+	}
+
+	@GET
+	@Path("/firm")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getFirm(Firm fm, @Context HttpServletRequest request) {
+		User current = (User) request.getSession().getAttribute("user");
+		FirmDAO dao = (FirmDAO) ctx.getAttribute("firmDAO");
+		Firm target = dao.find(fm.getPib());
+		if (target == null) {
+			return Response.status(400).build();
+		}
+
+		if (current.getuType() == 2 || current.getuType() == 3) {
+			return Response.ok(target).build();
+		} else {
+			return Response.status(400).build();
+		}
+
+	}
+
+
+	@GET
+	@Path("/find-user")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response findUser(User us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		User target = dao.find(us.getUsername());
+
+		if (target == null) {
+			return Response.status(400).build();
+		}
+		
+		return Response.ok(target).build();
+	}
+
+	@GET
+	@Path("/cart")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getCart(@Context HttpServletRequest request) {
+		User current = (User) request.getSession().getAttribute("user");
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(current.getUsername());
+		
+		if (target == null) {
+			return Response.status(400).build();
+		}
+
+		return Response.ok(target.getCart()).build();
+	}
+
+	@GET
+	@Path("/history")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getHistory(@Context HttpServletRequest request) {
+		User current = (User) request.getSession().getAttribute("user");
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(current.getUsername());
+		
+		if (target == null) {
+			return Response.status(400).build();
+		}
+
+		return Response.ok(target.getHistory()).build();
+	}
 
 	/*private void sendConfirmationMail(String userEmail) {
 		final String email = "thegootwizard@gmail.com";

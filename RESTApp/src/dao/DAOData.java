@@ -7,6 +7,8 @@ public class DAOData {
 	private OperatorDAO oDAO;
 	private PhotoDAO pDAO;
 	private BasicUserDAO uDAO;
+	private FirmDAO fDAO;
+	
 	public AdminDAO getaDAO() {
 		return aDAO;
 	}
@@ -31,15 +33,22 @@ public class DAOData {
 	public void setuDAO(BasicUserDAO uDAO) {
 		this.uDAO = uDAO;
 	}
-	public DAOData(AdminDAO aDAO, OperatorDAO oDAO, PhotoDAO pDAO, BasicUserDAO uDAO) {
+	public DAOData(AdminDAO aDAO, OperatorDAO oDAO, PhotoDAO pDAO, BasicUserDAO uDAO, FirmDAO fDAO) {
 		super();
 		this.aDAO = aDAO;
 		this.oDAO = oDAO;
 		this.pDAO = pDAO;
 		this.uDAO = uDAO;
+		this.fDAO = fDAO;
 	}
 	public DAOData() {
 		super();
+	}
+	public FirmDAO getfDAO() {
+		return fDAO;
+	}
+	public void setfDAO(FirmDAO fDAO) {
+		this.fDAO = fDAO;
 	}
 
 	

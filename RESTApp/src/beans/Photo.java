@@ -10,7 +10,7 @@ public class Photo {
 	private String name;
 	private Double price;
 	private String resolution;
-	private String location;
+	private String byteArray;
 	private String owner;
 	private String category;
 	private String description;
@@ -46,12 +46,7 @@ public class Photo {
 	public void setResolution(String resolution) {
 		this.resolution = resolution;
 	}
-	public String getLocation() {
-		return location;
-	}
-	public void setLocation(String location) {
-		this.location = location;
-	}
+	
 	public String getOwner() {
 		return owner;
 	}
@@ -89,6 +84,14 @@ public class Photo {
 
 	public void setComments(ArrayList<Comment> comments) {
 		this.comments = comments;
+	}
+
+	public String getByteArray() {
+		return byteArray;
+	}
+
+	public void setByteArray(String byteArray) {
+		this.byteArray = byteArray;
 	}
 
 	

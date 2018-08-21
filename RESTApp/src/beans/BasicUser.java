@@ -1,13 +1,21 @@
 package beans;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class BasicUser extends User {
+	
 	private String email;
 	private String country;
+	private Cart cart;
+	
 	
 	private ArrayList<Card> cards = new ArrayList<Card>();
-	
+	private ArrayList<Photo> photos = new ArrayList<Photo>();
+	private Map<String, Cart> history = new HashMap<>();
+
 
 	public BasicUser() {
 		super();
@@ -40,5 +48,52 @@ public class BasicUser extends User {
 	public void setCards(ArrayList<Card> cards) {
 		this.cards = cards;
 	}
+
+	public ArrayList<Photo> getPhotos() {
+		return photos;
+	}
+
+	public void setPhotos(ArrayList<Photo> photos) {
+		this.photos = photos;
+	}
+
+	public boolean removePhoto(UUID id) {
+		for(int i=0;i<photos.size();i++) {
+			if(photos.get(i).getId().equals(id)) {
+				photos.remove(i);
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean owns(Photo photo) {
+		for(int i=0;i<photos.size();i++) {
+			if(photos.get(i).getId().equals(photo.getId())) {
+				return true;
+			}
+		}		return false;
+	}
+
+	public Cart getCart() {
+		return cart;
+	}
+
+	public void setCart(Cart cart) {
+		this.cart = cart;
+	}
+
+	public Map<String, Cart> getHistory() {
+		return history;
+	}
+
+	public void setHistory(Map<String, Cart> history) {
+		this.history = history;
+	}
+	
+	public void addToHistory(String date, Cart cart) {
+		this.history.put(date, cart);
+	}
+	
 	
 }
