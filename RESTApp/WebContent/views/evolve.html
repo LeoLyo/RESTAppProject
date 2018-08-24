@@ -5,9 +5,10 @@
     <input type="file" id="pictureUploadInput" accept="image/*" file-input="files" multiple/>
     <input type="submit" value="Attach">
     <h4>{{imageMessage}}</h4>
-    <li ng-repeat="file in files">
-      <img ng-src="data:image/JPEG;base64,{{imageBA}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
+    <li ng-repeat="file in Test">
+      <img ng-src="{{file.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
       <h3>{{file.name}}</h3>
+      <h3>{{file.resolution}}</h3>
       <div class="remove" ng-click="removeImage(file)">x</div>
     </li>
   </form>

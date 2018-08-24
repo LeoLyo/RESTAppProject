@@ -57,7 +57,7 @@ public class BasicUser extends User {
 		this.photos = photos;
 	}
 
-	public boolean removePhoto(UUID id) {
+	public boolean removePhoto(String id) {
 		for(int i=0;i<photos.size();i++) {
 			if(photos.get(i).getId().equals(id)) {
 				photos.remove(i);

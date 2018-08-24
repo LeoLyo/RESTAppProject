@@ -60,6 +60,7 @@ webRestApp.config(['$routeProvider',function($routeProvider){
 webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScope){
   var service = {};
   var urlBase = 'http://localhost:8080/RESTApp/rest';
+
   service.overrideCurrentUser = function(userDataObject){
     $rootScope.Singleton.YouUser=userDataObject;
     console.log('OVERRIDDEN: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -85,9 +86,12 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   service.login = function(lUser){
     return $http.post(urlBase+'/login',lUser);
   };
+
   service.logout = function(){
     return $http.get(urlBase+'/logout');
   }
+
+
 
 /*Redirect paths*/
 
@@ -108,9 +112,12 @@ webRestApp.directive('fileInput',['$parse',function($parse){
   return{
     restrict:'A',
     link:function(scope,elm,attrs){
+      var model = $parse(attrs.fileInput);
+      var modelSetter = model.assign;
+
       elm.bind('change',function(){
-        $parse(attrs.fileInput).assign(scope,elm[0].files)
-        scope.$apply()
+        modelSetter(scope,elm[0].files);
+        //$parse(attrs.fileInput).assign(scope,elm[0].files)
       })
     }
   }
@@ -244,11 +251,13 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
 
     var formatedUser=angular.toJson($scope.logintrialuser);
     console.log(formatedUser);
+
     userConfig.login(formatedUser).then(function(formatedUser,status){
       userConfig.getCurrentUser().then(function(response){
         userConfig.overrideCurrentUser(response.data);
         console.log('LOGGED IN USER RAW: '+angular.toJson(response.data));
         console.log('LOGGED IN USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
+
       });
 
       $scope.redirect=userConfig.getHomeRedirectPath();
@@ -272,12 +281,14 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
 
 webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$window', function($scope,$http, userConfig, $window){
   $scope.registerUser=function(){
+
     $scope.newuser={
       username: $scope.userbeingregistered.username,
       password: $scope.userbeingregistered.password,
       email: $scope.userbeingregistered.email,
       country: $scope.userbeingregistered.country
     };
+
     $scope.userbeingregistered.username="";
     $scope.userbeingregistered.password="";
     $scope.userbeingregistered.email="";
@@ -295,6 +306,7 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$win
     });
   };
 }]);
+
 
 webRestApp.controller('LogoutController',['$scope','$http','$rootScope', 'userConfig',function($scope, $http, $rootScope, userConfig){
   $scope.userTemplate={
@@ -324,26 +336,29 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
 
 
 webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
-  
-  $scope.imageMessage="BLAA";
-  $scope.pictureArray=[];
-  $scope.counter=0;
+
+  $scope.Test=[];
+  $scope.count=0;
+  $scope.imageMessage="Number of current images for grading: " + $scope.count;
+
   console.log("RAKOMIR ALMIGHTY");
 
   $scope.evolveUser = function(){
     console.log("ENETERED ATTACHING EVOLUTION");
     angular.forEach($scope.files, function(file){
 
+
       var breader = new FileReader();
       var reader = new FileReader();
 
-      $scope.counter++;
+      if(file){
+        reader.readAsDataURL(file);
+        breader.readAsArrayBuffer(file);
+      }
 
       reader.addEventListener("load",function(){
 
-        var image = new Image();
-        image.src=reader.result;
-        breader.onload = function(){
+        /*breader.onload = function(){
           var arrayBuffer = breader.result;
           $scope.array = new Uint8Array(arrayBuffer);
           $scope.len = $scope.array.byteLength;
@@ -354,21 +369,63 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
           //$scope.binaryString = String.fromCharCode.apply(null,$scope.array);
           //console.log("BYTE ARRAY: " + $scope.binaryString);
-          console.log("NEW BYTE ARRAY: "+$scope.binary);
-          $scope.imageBA=window.btoa($scope.binary);
+          //console.log("NEW BYTE ARRAY: "+$scope.binary);
+          $scope.tempImage.byteArray=$scope.binary;
+          console.log("INSIDE BYTE ARRAY ONLOAD");
+        }*/
+        var image = new Image();
+        image.src=reader.result;
+        image.onload=function(){
+
+          $scope.count++;
+          $scope.tempImage={
+            name: "",
+            byteArray: "",
+            resolution: ""
+          };
+          //console.log("NEW RAK: " + image.src);
+          console.log("ENTERED ONLOAD OF IMAGE");
+          //console.log("AOA: " + file.name + " | " + image.width + " | " + image.height);
+          $scope.tempImage.name = file.name;
+          $scope.tempImage.resolution = image.width+"x"+image.height;
+          $scope.tempImage.byteArray = image.src;
+
+
+        $scope.formatTest = angular.toJson($scope.Test);
+        console.log("RAKSON: " + $scope.formatTest);
+        //console.log("RAK IS ALWAYS WITH US: " +   $scope.Test[$scope.count-1]);
+        //console.log("QUAAA: "+$scope.Test[$scope.count-1].name+" | "+$scope.Test[$scope.count-1].resolution+" | "+"imagine a byte array");
+
+        $scope.Test.push({
+        name: $scope.tempImage.name,
+        resolution: $scope.tempImage.resolution,
+        byteArray: $scope.tempImage.byteArray
+      });
+
+
 
         }
-        image.onload=function(){
-          console.log("ENTERED ONLOAD OF IMAGE");
-          console.log("AOA: " + file.name + " | " + image.height + " | " + image.width);
-        }
+
+        /*$scope.imageBA=window.btoa($scope.pictureArray[$scope.count-1].byteArray);
+          $scope.Test.push({
+          name: $scope.tempImage.name,
+          resolution: $scope.tempImage.resolution,
+          byteArray: $scope.tempImage.byteArray
+        });
+        $scope.formatTest = angular.toJson($scope.Test);
+        console.log("RAKSON: " + $scope.formatTest);
+        console.log("RAK IS ALWAYS WITH US: " +   $scope.Test[$scope.count-1]);
+        console.log("QUAAA: "+$scope.Test[$scope.count-1].name+" | "+$scope.Test[$scope.count-1].resolution+" | "+"imagine a byte array");*/
+
       },false);
-      if(file){
-        reader.readAsDataURL(file);
-        breader.readAsArrayBuffer(file);
-      }
+
     })
+
+    //$scope.$apply();
   };
+
+
+
 }]);
 
 
@@ -391,7 +448,6 @@ webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$roo
   //console.log("YOYO "+ usernameOfVerifiedUser+" | "+$scope.verifiedUser.username);
   });
 
-
   /*
   $scope.verifiedUser = userConfig.copyCurrentuser();
   $scope.verifiedUser.activated=true;
@@ -410,7 +466,7 @@ webRestApp.controller('UpgradeTestingController',['$scope','$http','$rootScope',
 }]);
 
 webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
-  $scope.pictureArray=[];
+/*  $scope.pictureArray=[];
   $scope.counter=0;
   console.log("RAKOMIR ALMIGHTY");
 

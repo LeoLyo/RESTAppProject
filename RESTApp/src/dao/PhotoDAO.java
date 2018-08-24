@@ -2,14 +2,13 @@ package dao;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import beans.Photo;
 
 public class PhotoDAO {
 
 	
-	private Map<UUID, Photo> photos = new HashMap<>();
+	private Map<String, Photo> photos = new HashMap<>();
 
 	
 	public PhotoDAO() {
@@ -18,18 +17,18 @@ public class PhotoDAO {
 	}
 
 	
-	public Map<UUID, Photo> getPhotos() {
+	public Map<String, Photo> getPhotos() {
 		return photos;
 	}
 
 
 
-	public void setPhotos(Map<UUID, Photo> photos) {
+	public void setPhotos(Map<String, Photo> photos) {
 		this.photos = photos;
 	}
 	
 	
-	public Photo find(UUID id, String byteArray) {
+	public Photo find(String id, String byteArray) {
 		if (!photos.containsKey(id)) {
 			return null;
 		}
@@ -40,7 +39,7 @@ public class PhotoDAO {
 		return photo;
 	}
 	
-	public boolean remove(UUID id) {
+	public boolean remove(String id) {
 		if(photos.containsKey(id)) {
 			photos.remove(id);
 			return true;

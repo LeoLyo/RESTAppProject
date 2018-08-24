@@ -141,7 +141,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 				ctx.setAttribute("firmDAO", new FirmDAO());
 			}
 			
-			System.out.println("REGISTER TESTING FROM DATABASE IN LISTENER: "+data.getuDAO().find("pujomir"));
+			System.out.println("REGISTER TESTING FROM DATABASE IN LISTENER: "+data.getuDAO().find("rakomir"));
 
 		} catch (JsonParseException e) {
 			e.printStackTrace();

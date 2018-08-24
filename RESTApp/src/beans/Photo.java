@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class Photo {
 	
-	private UUID id;
+	private String id;
 	private String name;
 	private Double price;
 	private String resolution;
@@ -22,10 +22,13 @@ public class Photo {
 		super();
 	}
 	
-	public UUID getId() {
+	
+	
+	
+	public String getId() {
 		return id;
 	}
-	public void setId(UUID id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 	public String getName() {
