@@ -7,7 +7,8 @@ webRestApp.run(function($rootScope){
       password:"",
       uType:-1,
       activated:true
-    }
+    },
+    Test:[]
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
 });
@@ -112,10 +113,12 @@ webRestApp.directive('fileInput',['$parse',function($parse){
   return{
     restrict:'A',
     link:function(scope,elm,attrs){
+      console.log("Directive link function");
       var model = $parse(attrs.fileInput);
       var modelSetter = model.assign;
 
       elm.bind('change',function(){
+        console.log("Directive element bind");
         modelSetter(scope,elm[0].files);
         //$parse(attrs.fileInput).assign(scope,elm[0].files)
       })
@@ -339,7 +342,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
   $scope.Test=[];
   $scope.count=0;
-  $scope.imageMessage="Number of current images for grading: " + $scope.count;
+  $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.Test.length;
 
   console.log("RAKOMIR ALMIGHTY");
 
@@ -351,10 +354,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
       var breader = new FileReader();
       var reader = new FileReader();
 
-      if(file){
-        reader.readAsDataURL(file);
-        breader.readAsArrayBuffer(file);
-      }
+
 
       reader.addEventListener("load",function(){
 
@@ -378,6 +378,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
         image.onload=function(){
 
           $scope.count++;
+          console.log("NOW COUNT: "+$scope.count);
           $scope.tempImage={
             name: "",
             byteArray: "",
@@ -391,18 +392,19 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
           $scope.tempImage.byteArray = image.src;
 
 
-        $scope.formatTest = angular.toJson($scope.Test);
-        console.log("RAKSON: " + $scope.formatTest);
+        $scope.formatTest = angular.toJson($rootScope.Singleton.Test);
+        //console.log("RAKSON: " + $scope.formatTest);
         //console.log("RAK IS ALWAYS WITH US: " +   $scope.Test[$scope.count-1]);
         //console.log("QUAAA: "+$scope.Test[$scope.count-1].name+" | "+$scope.Test[$scope.count-1].resolution+" | "+"imagine a byte array");
 
-        $scope.Test.push({
+        $rootScope.Singleton.Test.push({
         name: $scope.tempImage.name,
         resolution: $scope.tempImage.resolution,
         byteArray: $scope.tempImage.byteArray
       });
 
 
+      //console.log("TESTING ROOTTEST: " + $rootScope.Singleton.Test.length);
 
         }
 
@@ -419,11 +421,22 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
       },false);
 
+      if(file){
+        reader.readAsDataURL(file);
+        breader.readAsArrayBuffer(file);
+      }
+
     })
 
+    //$state.reload();
     //$scope.$apply();
+    //console.log(">>>>>>>>>" + $scope.count + " >>>>>>>>> " + $rootScope.Singleton.Test.length);
   };
 
+$scope.refreshRak = function(){
+  console.log("TESTING ROOT ON REFRESH: " + $rootScope.Singleton.Test.length);
+  $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.Test.length;
+}
 
 
 }]);
