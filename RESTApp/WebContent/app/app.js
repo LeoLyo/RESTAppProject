@@ -92,19 +92,7 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
     return $http.get(urlBase+'/logout');
   }
 
-
-
-/*Redirect paths*/
-
-  service.getHomeRedirectPath = function(){
-    return '#!/test.html';
-  }
-
-  service.getWaitingForValidationRedirectPath = function(){
-    return '#!/waiting_for_validation.html';
-  }
-
-  return service;
+    return service;
 }]);
 
 //IMAGE UPLOAD DIRECTIVE
@@ -193,7 +181,7 @@ webRestApp.controller('HeaderController',['$scope', '$http','$rootScope','userCo
 }]);
 
 
-webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
   $scope.currentuser={};
   $scope.homeMessage="Please log in!";
 
@@ -203,11 +191,8 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
   });
 
   $scope.init = function(){
-    if(!$rootScope.Singleton.YouUser.activated){
-
-      $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
-      console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
-      $window.location.href = $scope.notActivatedRedirect;
+    if($rootScope.Singleton.YouUser.activated==false){
+        $location.path('/waiting_for_validation');
       console.log('Waiting For Validation redirected successfully!');
     }
   }
@@ -242,7 +227,7 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
 }]);
 
 
-webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window', 'userConfig',function($scope, $http, $rootScope, $window, userConfig){
+webRestApp.controller('LoginController',['$scope','$http','$rootScope','$location', 'userConfig',function($scope, $http, $rootScope, $location, userConfig){
 
   $scope.loginUser=function(){
     $scope.logintrialuser={
@@ -261,28 +246,31 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$window'
         console.log('LOGGED IN USER RAW: '+angular.toJson(response.data));
         console.log('LOGGED IN USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
 
+        if($rootScope.Singleton.YouUser.activated==false){
+          $location.path('/waiting_for_validation');
+          console.log('REDIRECT TO WAITING SUCCEEDED!')
+        }else{
+          $location.path('/home');
+        console.log('REDIRECT TO LOGIN SUCCEDED!');
+        }
       });
 
-      $scope.redirect=userConfig.getHomeRedirectPath();
-      console.log('LOGIN REDIRECT PATH: '+$scope.redirect);
-      $window.location.href = $scope.redirect;
-      console.log('Login manifested successfully!');
+
     });
    };
 
    $scope.init = function(){
-     if(!$rootScope.Singleton.YouUser.activated){
-       $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
-       console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
-       $window.location.href = $scope.notActivatedRedirect;
+     if($rootScope.Singleton.YouUser.activated==false){
+         $location.path('/waiting_for_validation');
        console.log('Waiting For Validation redirected successfully!');
      }
    }
+
    $scope.init();
 }]);
 
 
-webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$window', function($scope,$http, userConfig, $window){
+webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$location', function($scope,$http, userConfig, $location){
   $scope.registerUser=function(){
 
     $scope.newuser={
@@ -301,10 +289,7 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$win
     userConfig.register(formatedUser).then(function(formatedUser,status){
       console.log('New user registered successfully!');
 
-      //REDIRECTION NEEDS FIXING
-      $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
-      console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
-      $window.location.href = $scope.notActivatedRedirect;
+      $location.path('/login');
       console.log('Waiting For Validation redirected successfully!');
     });
   };
@@ -338,7 +323,7 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
 
 
 
-webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
 
   $scope.Test=[];
   $scope.count=0;
@@ -439,6 +424,15 @@ $scope.refreshRak = function(){
 }
 
 
+$scope.init = function(){
+  if($rootScope.Singleton.YouUser.activated==false){
+      $location.path('/waiting_for_validation');
+    console.log('Waiting For Validation redirected successfully!');
+  }
+}
+
+$scope.init();
+
 }]);
 
 
@@ -474,11 +468,21 @@ webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$roo
   });*/
 }]);
 
-webRestApp.controller('UpgradeTestingController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+webRestApp.controller('UpgradeTestingController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
   console.log("LOVE IS LIFE");
+
+  $scope.init = function(){
+    if($rootScope.Singleton.YouUser.activated==false){
+        $location.path('/waiting_for_validation');
+      console.log('Waiting For Validation redirected successfully!');
+    }
+  }
+
+  $scope.init();
 }]);
 
-webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig','$window', function($scope, $http, $rootScope, userConfig, $window){
+
+/*webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
 /*  $scope.pictureArray=[];
   $scope.counter=0;
   console.log("RAKOMIR ALMIGHTY");
@@ -522,17 +526,14 @@ $scope.upload = function(){
 
 }
 
-*/
 
-  $scope.init = function(){
-    console.log("TEST INIT");
-    if(!$rootScope.Singleton.YouUser.activated){
-      $scope.notActivatedRedirect=userConfig.getWaitingForValidationRedirectPath();
-      console.log('WAITING FOR VALIDATION REDIRECT PATH: '+$scope.notActivatedRedirect);
-      $window.location.href = $scope.notActivatedRedirect;
-      console.log('Waiting For Validation redirected successfully!');
-    }
+
+$scope.init = function(){
+  if($rootScope.Singleton.YouUser.activated==false){
+      $location.path('/waiting_for_validation');
+    console.log('Waiting For Validation redirected successfully!');
   }
+}
 
-  $scope.init();
-}]);
+$scope.init();
+}]);*/
