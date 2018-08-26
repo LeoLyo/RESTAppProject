@@ -40,7 +40,7 @@ public class LoginService {
 	String contextPath;
 
 	/* -1 : unknown
-		0: normal user
+		0: basic user (buyer)
 		1: seller
 		2: operator
 		3: admin
@@ -412,6 +412,27 @@ public class LoginService {
 		
 		return Response.ok(target).build();
 	}
+	
+	
+	//Has problems, mate
+	/*
+	@POST
+	@Path("/check-username")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response checkUsername(User us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		User target = dao.find(us.getUsername());
+
+		if (target == null) {
+			return Response.status(200).build();
+
+		}else{
+			return Response.status(400).build();
+		}
+	}*/
+	
+	
 
 	@GET
 	@Path("/cart")

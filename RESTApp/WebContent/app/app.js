@@ -7,8 +7,7 @@ webRestApp.run(function($rootScope){
       password:"",
       uType:-1,
       activated:true
-    },
-    Test:[]
+    }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
 });
@@ -71,6 +70,10 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
     console.log('COPY CURRENT USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
     return $rootScope.Singleton.YouUser;
   };
+
+  service.checkUsername = function(){
+    return $http.get(urlBase+'/check-username');
+  }
 
   service.getCurrentUser = function(){
     return $http.get(urlBase+'/user');
@@ -271,8 +274,11 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$locatio
 
 
 webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$location', function($scope,$http, userConfig, $location){
+  $scope.usernameExists=false;
+  $scope.errorMessage="";
   $scope.registerUser=function(){
-
+    $scope.usernameExists=false;
+    $scope.errorMessage="";
     $scope.newuser={
       username: $scope.userbeingregistered.username,
       password: $scope.userbeingregistered.password,
@@ -284,13 +290,20 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$loc
     $scope.userbeingregistered.password="";
     $scope.userbeingregistered.email="";
     $scope.userbeingregistered.country="";
+/*
+  userConfig.checkUsername(formatedUser).then(function(formatedUser,status){
+    console.log("ASDSAD: " + status.data);
+    console.log("GFDGDFS: " + status);
+  });*/
 
     var formatedUser=angular.toJson($scope.newuser);
     userConfig.register(formatedUser).then(function(formatedUser,status){
       console.log('New user registered successfully!');
-
       $location.path('/login');
       console.log('Waiting For Validation redirected successfully!');
+    }, function(response){
+      $scope.usernameExists=true;
+      $scope.errorMessage=response.data;
     });
   };
 }]);
@@ -326,8 +339,8 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
 webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
 
   $scope.Test=[];
-  $scope.count=0;
-  $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.Test.length;
+  //$scope.count=0;
+  $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.YouUser.test.length;
 
   console.log("RAKOMIR ALMIGHTY");
 
@@ -362,8 +375,8 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
         image.src=reader.result;
         image.onload=function(){
 
-          $scope.count++;
-          console.log("NOW COUNT: "+$scope.count);
+          /*$scope.count++;*/
+
           $scope.tempImage={
             name: "",
             byteArray: "",
@@ -377,16 +390,18 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
           $scope.tempImage.byteArray = image.src;
 
 
-        $scope.formatTest = angular.toJson($rootScope.Singleton.Test);
+        $scope.formatTest = angular.toJson($rootScope.Singleton.YouUser.test);
         //console.log("RAKSON: " + $scope.formatTest);
         //console.log("RAK IS ALWAYS WITH US: " +   $scope.Test[$scope.count-1]);
         //console.log("QUAAA: "+$scope.Test[$scope.count-1].name+" | "+$scope.Test[$scope.count-1].resolution+" | "+"imagine a byte array");
 
-        $rootScope.Singleton.Test.push({
+        $rootScope.Singleton.YouUser.test.push({
         name: $scope.tempImage.name,
         resolution: $scope.tempImage.resolution,
-        byteArray: $scope.tempImage.byteArray
+        byteArray: $scope.tempImage.byteArray,
+        grade: 0
       });
+      console.log("NOW TEST COUNT: "+$rootScope.Singleton.YouUser.test.length);
 
 
       //console.log("TESTING ROOTTEST: " + $rootScope.Singleton.Test.length);
@@ -418,20 +433,31 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
     //console.log(">>>>>>>>>" + $scope.count + " >>>>>>>>> " + $rootScope.Singleton.Test.length);
   };
 
-$scope.refreshRak = function(){
-  console.log("TESTING ROOT ON REFRESH: " + $rootScope.Singleton.Test.length);
-  $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.Test.length;
-}
 
-
-$scope.init = function(){
-  if($rootScope.Singleton.YouUser.activated==false){
-      $location.path('/waiting_for_validation');
-    console.log('Waiting For Validation redirected successfully!');
+  $scope.removeImage = function(image){
+    var indexRemovedImage = $rootScope.Singleton.YouUser.test.indexOf(image);
+    $rootScope.Singleton.YouUser.test.splice(indexRemovedImage,1);
+    $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.YouUser.test.length;
   }
-}
+  $scope.clearList = function(){
+    $rootScope.Singleton.YouUser.test=[];
+    $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.YouUser.test.length;
 
-$scope.init();
+  }
+  $scope.refreshRak = function(){
+    if($rootScope.Singleton.YouUser.test.length>10){
+      $rootScope.Singleton.YouUser.test.length=10;
+    }
+    console.log("TESTING ROOT ON REFRESH: " + $rootScope.Singleton.YouUser.test.length);
+    $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.YouUser.test.length;
+  }
+  $scope.init = function(){
+    if($rootScope.Singleton.YouUser.activated==false){
+        $location.path('/waiting_for_validation');
+      console.log('Waiting For Validation redirected successfully!');
+    }
+  }
+  $scope.init();
 
 }]);
 

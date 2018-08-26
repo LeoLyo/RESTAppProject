@@ -3,7 +3,6 @@ package beans;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class BasicUser extends User {
 	
@@ -11,7 +10,7 @@ public class BasicUser extends User {
 	private String country;
 	private Cart cart;
 	
-	
+	private ArrayList<Photo> test = new ArrayList<Photo>();
 	private ArrayList<Card> cards = new ArrayList<Card>();
 	private ArrayList<Photo> photos = new ArrayList<Photo>();
 	private Map<String, Cart> history = new HashMap<>();
@@ -95,5 +94,11 @@ public class BasicUser extends User {
 		this.history.put(date, cart);
 	}
 	
-	
+	public ArrayList<Photo> getTest() {
+		return test;
+	}
+
+	public void setTest(ArrayList<Photo> test) {
+		this.test = test;
+	}
 }
