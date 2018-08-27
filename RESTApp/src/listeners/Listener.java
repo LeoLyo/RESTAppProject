@@ -17,6 +17,7 @@ import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_es;
 
 import beans.Admin;
 import beans.BasicUser;
+import beans.Operator;
 import dao.AdminDAO;
 import dao.BasicUserDAO;
 import dao.DAOData;
@@ -124,9 +125,17 @@ public class Listener implements javax.servlet.ServletContextListener {
 			}
 
 			if (data.getoDAO() != null) {
+
+				if (data.getoDAO().findAll().isEmpty()) {
+					data.getoDAO().add(new Operator("khun", "blue_turtle"));
+					data.getoDAO().find("khun").setFirstTime(false);
+				}
 				ctx.setAttribute("operatorDAO", data.getoDAO());
 			} else {
-				ctx.setAttribute("operatorDAO", new OperatorDAO());
+				OperatorDAO oDAO = new OperatorDAO();
+				oDAO.add(new Operator("khun", "blue_turtle"));
+				oDAO.find("khun").setFirstTime(false);
+				ctx.setAttribute("operatorDAO", oDAO);
 			}
 
 			if (data.getpDAO() != null) {
@@ -157,7 +166,11 @@ public class Listener implements javax.servlet.ServletContextListener {
 			aDAO.add(new Admin("admin", "admin"));
 			ctx.setAttribute("adminDAO", aDAO);
 			
-			ctx.setAttribute("operatorDAO", new OperatorDAO());
+			OperatorDAO oDAO = new OperatorDAO();
+			oDAO.add(new Operator("khun", "blue_turtle"));
+			oDAO.find("khun").setFirstTime(false);
+			ctx.setAttribute("operatorDAO", oDAO);
+			
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 		} catch (JsonMappingException e) {
 			e.printStackTrace();
@@ -173,7 +186,11 @@ public class Listener implements javax.servlet.ServletContextListener {
 			aDAO.add(new Admin("admin", "admin"));
 			ctx.setAttribute("adminDAO", aDAO);
 			
-			ctx.setAttribute("operatorDAO", new OperatorDAO());
+			OperatorDAO oDAO = new OperatorDAO();
+			oDAO.add(new Operator("khun", "blue_turtle"));
+			oDAO.find("khun").setFirstTime(false);
+			ctx.setAttribute("operatorDAO", oDAO);
+			
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,7 +206,11 @@ public class Listener implements javax.servlet.ServletContextListener {
 			aDAO.add(new Admin("admin", "admin"));
 			ctx.setAttribute("adminDAO", aDAO);
 			
-			ctx.setAttribute("operatorDAO", new OperatorDAO());
+			OperatorDAO oDAO = new OperatorDAO();
+			oDAO.add(new Operator("khun", "blue_turtle"));
+			oDAO.find("khun").setFirstTime(false);
+			ctx.setAttribute("operatorDAO", oDAO);
+			
 			ctx.setAttribute("photoDAO", new PhotoDAO());
 
 		}

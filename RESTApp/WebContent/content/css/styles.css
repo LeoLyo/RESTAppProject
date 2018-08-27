@@ -130,6 +130,25 @@ main{
   margin-left: 10px;
 }
 
+.button_group button{
+    float: center;
+    background-color: #4CAF50; /* Green background */
+    border: 1px solid green; /* Green border */
+    color: white; /* White text */
+    padding: 10px 24px; /* Some padding */
+    cursor: pointer; /* Pointer/hand icon */
+    width: 50%; /* Set a width if needed */
+    display: block; /* Make the buttons appear below each other */
+}
+.button_group button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.button_group button:hover {
+    background-color: #3e8e41;
+}
+
 /*ANIMATIONS*/
 
 /*The starting CSS styles for the enter animation*/

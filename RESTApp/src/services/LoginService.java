@@ -39,7 +39,7 @@ public class LoginService {
 	@Context
 	ServletContext ctx;
 	String contextPath;
-	ReentrantLock ankh;
+	private ReentrantLock ankh;
 
 	/* -1 : unknown
 		0: basic user (buyer)
@@ -277,7 +277,7 @@ public class LoginService {
 	
 	//NEEDS FIXING ?? NAH BRAH
 	
-	@PUT
+	@GET
 	@Path("/verify")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -296,6 +296,23 @@ public class LoginService {
 		}
 	}
 	
+	@PUT
+	@Path("/find-user")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response findUser(User us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		System.out.println("What is wrong: " + us.getUsername());
+		BasicUser target = dao.find(us.getUsername());
+
+		if (target == null) {
+			return Response.status(400).build();
+		}
+		
+		return Response.ok(target).build();
+
+	}
+
 	
 	@PUT
 	@Path("/add-test-picture")
@@ -510,20 +527,7 @@ public class LoginService {
 	}
 
 
-	@GET
-	@Path("/find-user")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response findUser(User us, @Context HttpServletRequest request) {
-		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
-		User target = dao.find(us.getUsername());
-
-		if (target == null) {
-			return Response.status(400).build();
-		}
-		
-		return Response.ok(target).build();
-	}
+	
 	
 	
 	//Has problems, mate

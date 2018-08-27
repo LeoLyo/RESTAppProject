@@ -9,7 +9,10 @@ webRestApp.run(function($rootScope){
       activated:true
     },
     Testing:{
-      usersWaitingForGrading:[]
+      usersWaitingForGrading:[],
+      usersFailedAtEvolving:[],
+      usersWaitingForEvolving:[],
+      usersSucceededAtEvolving:[]
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -65,6 +68,28 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   })
   .when('/operator_created_successfully',{
     templateUrl: 'views/operator_created_successfully.html'
+  })
+  .when('/operator_mode',{
+    templateUrl: 'views/operator_mode.html',
+    controller: 'OperatorModeController'
+  })
+  .when('/who_to_test',{
+    templateUrl: 'views/who_to_test.html',
+    controller: 'WhoToTestController'
+  })
+  .when('/grade_test/:peasant_grading_in_progress',{
+    templateUrl: 'views/grade_test.html',
+    controller: 'GradeTestController'
+  })
+  .when('/whose_pics_to_approve',{
+    templateUrl: 'views/whose_pics_to_approve.html',
+    controller: 'WhosePicsToApproveController'
+  })
+  .when('/failed_to_evolve',{
+    templateUrl: 'views/failed_to_evolve.html'
+  })
+  .when('/grading_completed',{
+    templateUrl: 'views/grading_completed.html'
   })
   .otherwise({
     redirectTo:'/home'
@@ -131,6 +156,9 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
     return $http.put(urlBase+'/operator-first-time-change', oftcUser);
   };
 
+  service.findUser = function(fUser){
+    return $http.put(urlBase+'/find-user', fUser);
+  }
     return service;
 }]);
 
@@ -568,17 +596,15 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
       console.log("Evolve fu no. " + i + ": " + formatedUser);
       userConfig.addTestPicture(formatedUser).then(function(response, status){
         console.log("Picture no. " + i + " uploaded.");
-        if(i==10){
-          $rootScope.Singleton.Testing.usersWaitingForGrading.push({
-            username: $rootScope.Singleton.YouUser.username
-          });
-          console.log("Users waiting for grading: " + $rootScope.Singleton.Testing.usersWaitingForGrading.length + "QUQU: " + $rootScope.Singleton.Testing.usersWaitingForGrading[0]);
-          $location.path('/upload_successful');
-          console.log('Upload successful redirected successfully!');
-        }
       })
 
     }
+    $rootScope.Singleton.Testing.usersWaitingForGrading.push({
+      username: $rootScope.Singleton.YouUser.username
+    });
+    console.log("Users waiting for grading: " + $rootScope.Singleton.Testing.usersWaitingForGrading.length + "QUQU: " + $rootScope.Singleton.Testing.usersWaitingForGrading[0].username + " | " + $rootScope.Singleton.Testing.usersWaitingForGrading.length);
+    $location.path('/upload_successful');
+    console.log('Upload successful redirected successfully!');
 
     /*
     var formatedUser=angular.toJson($rootScope.Singleton.YouUser);
@@ -650,72 +676,76 @@ webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$roo
   });*/
 }]);
 
-webRestApp.controller('UpgradeTestingController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
-  console.log("LOVE IS LIFE");
 
-  $scope.init = function(){
-    if($rootScope.Singleton.YouUser.activated==false){
-        $location.path('/waiting_for_validation');
-      console.log('Waiting For Validation redirected successfully!');
-    }
+/*THE NEW AGE HAS COME*/
+
+webRestApp.controller('OperatorModeController', ['$scope','$location', function($scope, $location){
+
+  $scope.whoToTest = function(){
+    $location.path('/who_to_test');
   }
 
-  $scope.init();
+  $scope.whosePicsToApprove = function(){
+    $location.path('/whose_pics_to_approve');
+  }
 }]);
 
+webRestApp.controller('WhoToTestController', ['$scope','$rootScope','$location', function($scope, $rootScope, $location){
 
-/*webRestApp.controller('TestController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
-/*  $scope.pictureArray=[];
-  $scope.counter=0;
-  console.log("RAKOMIR ALMIGHTY");
-
-  $scope.upload = function(){
-    console.log("ENETERED UPLOAD");
-    var reader = new FileReader();
-    angular.forEach($scope.files, function(file){
-      if(file){
-        reader.readAsDataURL(file);
-      }
-      reader.addEventListener("load",function(){
-        var image = new Image();
-        image.src=reader.result;
-        console.log("NOTHING: " + image.src + " | " + image.height + " | " + image.width);
-      },false);
-
-    })
-  };
-
-/*
-$scope.pictureArray=[];
-$scope.openFile = function(file){
-    $scope.input = file.target;
-    var reader = new FileReader();
-    console.log("ENETERED OPENFILE");
-    reader.onload = function(){
-      var dataURL=reader.result;
-      console.log("DATAUR: "+dataURL);
-      var image = new Image();
-      image.src=dataURL;
-      image.onload=function(){
-        console.log("HEIGHT: "+image.height+" | WIDTH: "+image.width);
-      }
-    };
-    reader.readAsDataURL(input.files[0]);
-    console.log("READ AS DATA URL: " + reader.result);
-}
-
-$scope.upload = function(){
-
-}
-
-
-
-$scope.init = function(){
-  if($rootScope.Singleton.YouUser.activated==false){
-      $location.path('/waiting_for_validation');
-    console.log('Waiting For Validation redirected successfully!');
+  $scope.gradeSelectedPeasant = function(peasant){
+    var path = "/grade_test/"+peasant.username;
+    $location.path(path);
   }
-}
+}]);
 
-$scope.init();
-}]);*/
+webRestApp.controller('WhosePicsToApproveController', ['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
+
+}]);
+
+webRestApp.controller('GradeTestController', ['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.tempPeasant = {
+    username: $routeParams.peasant_grading_in_progress,
+    password: "temp",
+    uType: "0"
+  };
+  console.log("Peasant: " + $scope.tempPeasant.username);
+  $scope.peasantUser="";
+  $scope.result = 0;
+  var formatedUser = angular.toJson($scope.tempPeasant);
+  console.log("JSON PEASANT: " + formatedUser);
+  userConfig.findUser(formatedUser).then(function(response, satus){
+    console.log("Passed.");
+    $scope.peasantUser = response.data;
+    console.log("Please Lord: " + $scope.peasantUser.username + " | " + $scope.peasantUser.test.length);
+  });
+  Array.sum = function(key){
+    var total = 0;
+    for(var i=0;i<this.length;i++){
+      total += this[i][key]
+    }
+    return total
+  }
+  $scope.refreshTotalGrade = function(){
+    $scope.result = 0;
+    for(var i=0;i<$scope.peasantUser.test.length;i++){
+      $scope.result += parseFloat($scope.peasantUser.test[i].grade);
+    }
+    $scope.result = $scope.result / $scope.peasantUser.test.length;
+    console.log("Grade Totale: " + $scope.result);
+  }
+
+  $scope.finalizeGrading = function(image){
+    $scope.exchangingUser = $rootScope.Singleton.Testing.usersWaitingForGrading.indexOf(image);
+    $rootScope.Singleton.Testing.usersWaitingForGrading.splice($scope.exchangingUser ,1);
+    if($scope.result>4){
+      $rootScope.Singleton.Testing.usersWaitingForEvolving.push($scope.exchangingUser);
+      console.log("SIZE OLD: " +  $rootScope.Singleton.Testing.usersWaitingForGrading.length + "SIZE EVOLVED: " + $rootScope.Singleton.Testing.usersWaitingForEvolving.length);
+
+    }
+    else{
+      $rootScope.Singleton.Testing.usersFailedAtEvolving.push($scope.exchangingUser);
+      console.log("SIZE OLD: " +  $rootScope.Singleton.Testing.usersWaitingForGrading.length + "SIZE FAILED: " + $rootScope.Singleton.Testing.usersFailedAtEvolving.length);
+
+    }
+  }
+}]);
