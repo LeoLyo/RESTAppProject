@@ -255,22 +255,19 @@ public class LoginService {
 	}
 
 	@PUT
-	@Path("/promote")
+	@Path("/evolve")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response editUser(User us, @Context HttpServletRequest request) {
+	public Response evolveUser(User us, @Context HttpServletRequest request) {
 		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
 		User target = dao.find(us.getUsername());
-		User current = (User) request.getSession().getAttribute("user");
-
-		if (! (current.getuType() == 3)) {
-			return Response.status(400).build();
-		}
+		 
 		if (target == null) {
 			return Response.status(400).build();
 		} else {
 			target.setuType(1);
-			return Response.status(200).build();
+			System.out.println("Evolution completed for: " + us.getUsername());
+			return Response.ok(target).build();
 
 		}
 	}

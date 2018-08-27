@@ -2,6 +2,7 @@
   <div ng-controller="HeaderController">
     <h1>Web Photo Site {{userT}}</h1>
     <ul>
+      <li><a href="#!/merchant_corner" ng-show="Singleton.YouUser.uType==1">Merchant Corner</li>
       <li><a href="#!/operator_mode" ng-show="Singleton.YouUser.uType==2">Operator Mode</li>
       <li><a href="#!/evolve" ng-show="Singleton.YouUser.uType=='0'">Evolve</li>
       <li><a href="#!/add_operator"  ng-show="Singleton.YouUser.uType=='3'">Add operator</li>

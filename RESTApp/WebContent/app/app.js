@@ -85,11 +85,22 @@ webRestApp.config(['$routeProvider',function($routeProvider){
     templateUrl: 'views/whose_pics_to_approve.html',
     controller: 'WhosePicsToApproveController'
   })
+  .when('/grading_completed',{
+    templateUrl: 'views/grading_completed.html'
+  })
   .when('/failed_to_evolve',{
     templateUrl: 'views/failed_to_evolve.html'
   })
-  .when('/grading_completed',{
-    templateUrl: 'views/grading_completed.html'
+  .when('/waiting_to_evolve',{
+    templateUrl: 'views/waiting_to_evolve.html',
+    controller: 'WaitingToEvolveController'
+  })
+  .when('/succeeded_at_evolving',{
+    templateUrl: 'views/succeeded_at_evolving.html'
+  })
+  .when('/merchant_corner',{
+    templateUrl: 'views/merchant_corner.html',
+    controller: 'MerchantCornerController'
   })
   .otherwise({
     redirectTo:'/home'
@@ -158,7 +169,10 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
 
   service.findUser = function(fUser){
     return $http.put(urlBase+'/find-user', fUser);
-  }
+  };
+  service.evolveUser = function(eUser){
+    return $http.put(urlBase+'/evolve', eUser);
+  };
     return service;
 }]);
 
@@ -290,7 +304,8 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
   };
 
   $scope.testingMethod=function(){
-    console.log($scope.currentuser);
+
+    console.log("TESTING METHOD: " + $rootScope.Singleton.Testing.usersWaitingForEvolving[0].username);
   };
 
 
@@ -626,6 +641,8 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
       console.log('Waiting For Validation redirected successfully!');
     }
     $scope.person = $rootScope.Singleton.YouUser.username;
+
+    //Waiting for grading
     $scope.exists = false;
     for(var i=0;i<$rootScope.Singleton.Testing.usersWaitingForGrading.length;i++){
       if($scope.person==$rootScope.Singleton.Testing.usersWaitingForGrading[i].username){
@@ -637,6 +654,46 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
       $location.path('/upload_successful');
       console.log('Upload successful redirected successfully!');
     }
+
+    //Failed at Evolving
+    $scope.fExists = false;
+    for(var i=0;i<$rootScope.Singleton.Testing.usersFailedAtEvolving.length;i++){
+      if($scope.person==$rootScope.Singleton.Testing.usersFailedAtEvolving[i].username){
+        $scope.fExists = true;
+        break;
+      }
+    }
+    if($scope.fExists==true){
+      $location.path('/failed_to_evolve');
+      console.log('Failed at evolving (failed to evolve) redirected successfully!');
+    }
+
+    //Waiting to EVOLVE
+    $scope.wExists = false;
+    for(var i=0;i<$rootScope.Singleton.Testing.usersWaitingForEvolving.length;i++){
+      if($scope.person==$rootScope.Singleton.Testing.usersWaitingForEvolving[i].username){
+        $scope.wExists = true;
+        break;
+      }
+    }
+    if($scope.wExists==true){
+      $location.path('/waiting_to_evolve');
+      console.log('Waiting to evolve redirected successfully!');
+    }
+
+    //Succeeded at Evolving
+    $scope.sExists = false;
+    for(var i=0;i<$rootScope.Singleton.Testing.usersSucceededAtEvolving.length;i++){
+      if($scope.person==$rootScope.Singleton.Testing.usersSucceededAtEvolving[i].username){
+        $scope.sExists = true;
+        break;
+      }
+    }
+    if($scope.sExists==true){
+      $location.path('/succeeded_at_evolving');
+      console.log('Succeeded at evolving redirected successfully!');
+    }
+
   }
 
   $scope.init();
@@ -735,17 +792,53 @@ webRestApp.controller('GradeTestController', ['$scope','$http','$rootScope','use
   }
 
   $scope.finalizeGrading = function(image){
-    $scope.exchangingUser = $rootScope.Singleton.Testing.usersWaitingForGrading.indexOf(image);
+    $scope.exchangingUser = $rootScope.Singleton.Testing.usersWaitingForGrading.find(x => x.username==$routeParams.peasant_grading_in_progress);
+    console.log("EXCHANGING USER: " + $scope.exchangingUser.username+ " | " + $scope.exchangingUser);
     $rootScope.Singleton.Testing.usersWaitingForGrading.splice($scope.exchangingUser ,1);
+    console.log("EXCHANGING USER LATER: " + $scope.exchangingUser.username+ " | " + $scope.exchangingUser);
     if($scope.result>4){
-      $rootScope.Singleton.Testing.usersWaitingForEvolving.push($scope.exchangingUser);
+      $rootScope.Singleton.Testing.usersWaitingForEvolving.push({
+        username: $scope.exchangingUser.username
+      });
+      console.log("NEW EXCHANGED: " + $rootScope.Singleton.Testing.usersWaitingForEvolving.length + " AND NOW OBJECT " + $rootScope.Singleton.Testing.usersWaitingForEvolving[$rootScope.Singleton.Testing.usersWaitingForEvolving.length-1] + " AND NOW ELEMENT " + $rootScope.Singleton.Testing.usersWaitingForEvolving[$rootScope.Singleton.Testing.usersWaitingForEvolving.length-1].username);
       console.log("SIZE OLD: " +  $rootScope.Singleton.Testing.usersWaitingForGrading.length + "SIZE EVOLVED: " + $rootScope.Singleton.Testing.usersWaitingForEvolving.length);
 
     }
     else{
-      $rootScope.Singleton.Testing.usersFailedAtEvolving.push($scope.exchangingUser);
+      $rootScope.Singleton.Testing.usersFailedAtEvolving.push({
+        username: $scope.exchangingUser.username
+      });
       console.log("SIZE OLD: " +  $rootScope.Singleton.Testing.usersWaitingForGrading.length + "SIZE FAILED: " + $rootScope.Singleton.Testing.usersFailedAtEvolving.length);
 
     }
+    $location.path('/grading_completed');
   }
+}]);
+
+webRestApp.controller('WaitingToEvolveController', ['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.evolveFromPeasantToMerchant = function(){
+    $scope.evolvingUser = $rootScope.Singleton.Testing.usersWaitingForEvolving.find(x => x.username==$rootScope.Singleton.YouUser.username);
+    console.log("USERNAME: " + $scope.evolvingUser.username);
+    $rootScope.Singleton.Testing.usersWaitingForEvolving.splice($scope.evolvingUser,1);
+    $rootScope.Singleton.Testing.usersSucceededAtEvolving.push({
+      username: $scope.evolvingUser.username
+    });
+    $scope.unformatedUser={
+      username:$scope.evolvingUser.username,
+      password:"temp",
+      uType:"-1",
+    };
+    var formatedUser = angular.toJson($scope.unformatedUser);
+    console.log("WTEC JSON USER: " + formatedUser);
+    userConfig.evolveUser(formatedUser).then(function(response, status){
+      userConfig.overrideCurrentUser(response.data);
+      var formatedYou = angular.toJson($rootScope.Singleton.YouUser);
+      console.log("!: " + formatedYou);
+      $location.path('/home');
+    });
+  }
+}]);
+
+webRestApp.controller('MerchantCornerController', ['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+
 }]);
