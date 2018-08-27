@@ -101,4 +101,9 @@ public class BasicUser extends User {
 	public void setTest(ArrayList<Photo> test) {
 		this.test = test;
 	}
+
+	public void addPictureToTest(Photo photo) {
+		test.add(photo);
+		
+	}
 }

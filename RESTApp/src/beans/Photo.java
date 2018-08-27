@@ -14,6 +14,7 @@ public class Photo {
 	private String owner;
 	private String category;
 	private String description;
+	private int grade;
 	private int purchases = 0;
 	private HashMap<String, Integer> grades = new HashMap<String,Integer>();
 	private ArrayList<Comment> comments = new ArrayList<Comment>();
@@ -95,6 +96,14 @@ public class Photo {
 
 	public void setByteArray(String byteArray) {
 		this.byteArray = byteArray;
+	}
+
+	public int getGrade() {
+		return grade;
+	}
+	
+	public void setGrade(int grade) {
+		this.grade = grade;
 	}
 
 	

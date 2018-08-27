@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletContext;
@@ -38,6 +39,7 @@ public class LoginService {
 	@Context
 	ServletContext ctx;
 	String contextPath;
+	ReentrantLock ankh;
 
 	/* -1 : unknown
 		0: basic user (buyer)
@@ -182,7 +184,8 @@ public class LoginService {
 		}
 
 	}
-
+	
+	
 	@GET
 	@Path("/logout")
 	public Response logout(@Context HttpServletRequest request) throws URISyntaxException {
@@ -197,7 +200,6 @@ public class LoginService {
 	public Response getUser(@Context HttpServletRequest request) {
 		ArrayList<User> usr = new ArrayList<User>();
 		usr.add((User) request.getSession().getAttribute("user"));
-		//return usr;
 		return Response.ok((User) request.getSession().getAttribute("user")).build();
 	}
 
@@ -288,6 +290,54 @@ public class LoginService {
 
 		}
 	}
+	
+	
+	@PUT
+	@Path("/add-test-picture")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response addTestPicture(BasicUser us, @Context HttpServletRequest request) {
+		//ankh.lock();
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		System.out.println("JEbo amter: "+us.getUsername());
+		BasicUser target = dao.find(us.getUsername());
+		
+		if (! (target.getuType() == 0)||target==null) {
+			System.out.println("console.log()");
+			//ankh.unlock();
+			return Response.status(400).build();
+		}
+		 else {
+			target.addPictureToTest(us.getTest().get(0));
+			System.out.println("RAKOMIR TRENUTNO: " + target.getUsername()+" | " + target.getTest().size() + " | " + target.getTest().toString());
+			//ankh.unlock();
+			return Response.status(200).build();
+
+		}
+	}
+
+	
+	
+	@POST
+	@Path("/start-test")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response startTest(User us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(us.getUsername());
+		
+		if (! (target.getuType() == 0)||target==null) {
+			return Response.status(400).build();
+		}
+		 else {
+			target.setTest(((BasicUser)us).getTest());
+			System.out.println("RAKOMIR ZAUVJEK: " + target.getUsername()+" | " + target.getTest().size() + " | " + target.getTest().toString());
+			return Response.status(200).build();
+
+		}
+	}
+	
+	
 	
 	
 	@GET

@@ -7,6 +7,9 @@ webRestApp.run(function($rootScope){
       password:"",
       uType:-1,
       activated:true
+    },
+    Testing:{
+      usersWaitingForGrading:[]
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -45,6 +48,9 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   })
   .when('/waiting_for_validation',{
     templateUrl: 'views/waiting_for_validation.html'
+  })
+  .when('.upload_successful',{
+    templateUrl: 'views/upload_successful.html'
   })
   .when('/test',{
     templateUrl: 'views/test.html',
@@ -93,6 +99,12 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
 
   service.logout = function(){
     return $http.get(urlBase+'/logout');
+  };
+  service.startTest = function(stUser){
+    return $http.post(urlBase+'/start-test',stUser);
+  }
+  service.addTestPicture = function(atpUser){
+    return $http.put(urlBase+'/add-test-picture', atpUser);
   }
 
     return service;
@@ -302,8 +314,8 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$loc
       $location.path('/login');
       console.log('Waiting For Validation redirected successfully!');
     }, function(response){
-      $scope.usernameExists=true;
       $scope.errorMessage=response.data;
+      $scope.usernameExists=true;
     });
   };
 }]);
@@ -337,8 +349,8 @@ webRestApp.controller('AddOperatorController',['$scope',function($scope){
 
 
 webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
-
-  $scope.Test=[];
+  $scope.rakometer=false;
+  //$scope.Test=[];
   //$scope.count=0;
   $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.YouUser.test.length;
 
@@ -431,6 +443,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
     //$state.reload();
     //$scope.$apply();
     //console.log(">>>>>>>>>" + $scope.count + " >>>>>>>>> " + $rootScope.Singleton.Test.length);
+    $scope.rakometer=true;
   };
 
 
@@ -450,6 +463,52 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
     }
     console.log("TESTING ROOT ON REFRESH: " + $rootScope.Singleton.YouUser.test.length);
     $scope.imageMessage="Number of current images for grading: " + $rootScope.Singleton.YouUser.test.length;
+    $scope.rakometer=false;
+  }
+  $scope.uploadTest = function(){
+
+    for(var i=0;i<10;i++){
+
+      $scope.tempPicUser={
+        username: $rootScope.Singleton.YouUser.username,
+        test: []
+      };
+      console.log("No. "+i+" and "+$scope.tempPicUser.test.length);
+      
+      $scope.tempPicUser.test.push({
+        name:  $rootScope.Singleton.YouUser.test[i].name,
+        resolution: $rootScope.Singleton.YouUser.test[i].resolution,
+        byteArray: $rootScope.Singleton.YouUser.test[i].byteArray,
+        grade: 0
+      });
+      var formatedUser = angular.toJson($scope.tempPicUser);
+      console.log("Evolve fu no. " + i + ": " + formatedUser);
+      userConfig.addTestPicture(formatedUser).then(function(response, status){
+        console.log("Picture no. " + i + " uploaded.");
+        if(i==10){
+          $rootScope.Singleton.Testing.usersWaitingForGrading.push({
+            name: $rootScope.Singleton.YouUser.username
+          });
+          console.log("Users waiting for grading: " + $rootScope.Singleton.Testing.usersWaitingForGrading.length + "QUQU: " + $rootScope.Singleton.Testing.usersWaitingForGrading[0]);
+          $location.path('/upload_successful');
+          console.log('Upload successful redirected successfully!');
+        }
+      })
+
+    }
+
+    /*
+    var formatedUser=angular.toJson($rootScope.Singleton.YouUser);
+    console.log("Evolve fu: " + formatedUser);
+    userConfig.startTest(formatedUser).then(function(response, status){
+      console.log("Evolution commencing...");
+      $rootScope.Singleton.Testing.usersWaitingForGrading.push({
+        name: $rootScope.Singleton.YouUser.username
+      });
+      console.log("Users waiting for grading: " + $rootScope.Singleton.Testing.usersWaitingForGrading.length + "QUQU: " + $rootScope.Singleton.Testing.usersWaitingForGrading[0]);
+      $location.path('/upload_successful');
+      console.log('Upload successful redirected successfully!')
+    })*/
   }
   $scope.init = function(){
     if($rootScope.Singleton.YouUser.activated==false){

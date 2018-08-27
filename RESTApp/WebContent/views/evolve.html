@@ -1,12 +1,12 @@
 <div class="content">
   <h1>Welcome to the Evolving (Testing) Phase</h1>
-   <button ng-click="refreshRak()" style="float: right;">Rakify</button>
-   <button ng-click="clearList()" style="margin: 0 12px 0; float: right;">Remove All</button>
+   <button ng-click="refreshRak()" ng-disabled="rakometer==false" style="float: right;">Rakify</button>
+   <button ng-click="clearList()" ng-disabled="Singleton.YouUser.test.length<1" style="margin: 0 12px 0; float: right;">Remove All</button>
    <h2>HAIL RAK</h2>
   <form name="testPicsForm" ng-submit="evolveUser()" novalidate>
     <label for="pictureUploadInput">Picture for evolving (testing)</label>
     <input type="file" id="pictureUploadInput" ng-hide="Singleton.YouUser.test.length>=10" accept="image/*" file-input="files" multiple/>
-    <input type="submit" value="Attach">
+    <input type="submit" value="Attach" ng-disabled="rakometer==true || Singleton.YouUser.test.length>=10">
   </form>
   <h4>{{imageMessage}}</h4>
   <ol id="picture-list">
@@ -26,5 +26,5 @@
     </li>
   </ol>
   <h4>Total score: {{}}</h4>
-  <button ng-click="uploadTest()" style="float: center;">Upload</button>
+  <button ng-click="uploadTest()" ng-disabled="Singleton.YouUser.test.length<10" style="float: center;">Upload</button>
 </div>

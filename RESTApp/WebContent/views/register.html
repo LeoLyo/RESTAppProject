@@ -6,7 +6,7 @@
       <small style="color: red; display: block; text-align: center;">Enter a valid username</small>
     </div>
     <div ng-show='usernameExists'>
-      <small style="color: red; display: block; text-align: center;">Username already exists =(</small>
+      <small style="color: red; display: block; text-align: center;">{{errorMessage}}</small>
     </div>
     <input type="email" name=registerEmail ng-model="userbeingregistered.email" placeholder="Enter email" ng-required="true"/>
     <div ng-show="registerForm.registerEmail.$touched && registerForm.registerEmail.$invalid">
