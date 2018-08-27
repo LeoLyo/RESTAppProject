@@ -104,12 +104,14 @@ public class Listener implements javax.servlet.ServletContextListener {
 				if (data.getuDAO().findAll().isEmpty()) {
 					data.getuDAO().add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
 					data.getuDAO().find("rakomir").setActivated(true);
+					data.getuDAO().find("rakomir").setuType(1);
 				}
 				ctx.setAttribute("userDAO", data.getuDAO());
 			} else {
 				BasicUserDAO uDAO = new BasicUserDAO();
 				uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
 				uDAO.find("rakomir").setActivated(true);
+				uDAO.find("rakomir").setuType(1);
 				ctx.setAttribute("userDAO", uDAO);
 			}
 
@@ -158,6 +160,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 			BasicUserDAO uDAO = new BasicUserDAO();
 			uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
 			uDAO.find("rakomir").setActivated(true);
+			uDAO.find("rakomir").setuType(1);
 			ctx.setAttribute("userDAO", uDAO);
 			
 			System.out.println("Json parse exception");
@@ -178,6 +181,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 			BasicUserDAO uDAO = new BasicUserDAO();
 			uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
 			uDAO.find("rakomir").setActivated(true);
+			uDAO.find("rakomir").setuType(1);
 			ctx.setAttribute("userDAO", uDAO);
 			
 			System.out.println("Json mapping exception");
@@ -198,6 +202,7 @@ public class Listener implements javax.servlet.ServletContextListener {
 			BasicUserDAO uDAO = new BasicUserDAO();
 			uDAO.add(new BasicUser("rakomir", "rakrakrak","rakomir.utvarodizach@gmail.com","Rakoland"));
 			uDAO.find("rakomir").setActivated(true);
+			uDAO.find("rakomir").setuType(1);
 			ctx.setAttribute("userDAO", uDAO);
 			
 			System.out.println("io exception");

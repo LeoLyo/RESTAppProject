@@ -334,6 +334,37 @@ public class LoginService {
 
 		}
 	}
+	
+	
+	@POST
+	@Path("/add-card")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response addCard(BasicUser us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(us.getUsername());
+		
+		if(target==null){
+			System.out.println("Something went wrong");
+			return Response.status(400).build();
+		}
+		else if(!(target.getuType() == 1) && !(target.getuType() == 3)) {
+			System.out.println("Not merchant nor admin.");
+			return Response.status(400).build();
+		}
+		else if(target.getuType() == 0) {
+			System.out.println("Peasants can't use the Merchant Corner.");
+			return Response.status(400).build();
+		}
+		
+		else {
+			target.addCard(us.getCards().get(0));
+			System.out.println(us.getUsername() + " now has one more card to spare out of a total of " + us.getCards().size() + ".");
+			return Response.ok(target).build();
+		}
+
+	}
+	
 
 	@PUT
 	@Path("/change-password")
@@ -393,7 +424,7 @@ public class LoginService {
 		}
 	}
 	
-	
+	/*
 	@POST
 	@Path("/start-test")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -412,7 +443,7 @@ public class LoginService {
 
 		}
 	}
-	
+	*/
 	
 	
 	

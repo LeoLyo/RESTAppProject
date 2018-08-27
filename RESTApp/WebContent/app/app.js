@@ -102,6 +102,18 @@ webRestApp.config(['$routeProvider',function($routeProvider){
     templateUrl: 'views/merchant_corner.html',
     controller: 'MerchantCornerController'
   })
+  .when('/place_item_on_auction',{
+    templateUrl: 'views/place_item_on_auction.html',
+    controller: 'PlaceItemOnAuctionController'
+  })
+  .when('/your_auction_page',{
+    templateUrl: 'views/your_auction_page.html',
+    controller: 'YourAuctionPageController'
+  })
+  .when('/insert_credit_card',{
+    templateUrl: 'views/insert_credit_card.html',
+    controller: 'InsertCreditCardController'
+  })
   .otherwise({
     redirectTo:'/home'
   });
@@ -173,6 +185,9 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   service.evolveUser = function(eUser){
     return $http.put(urlBase+'/evolve', eUser);
   };
+  service.addCard = function(acUser){
+    return $http.post(urlBase+'/add-card', acUser);
+  }
     return service;
 }]);
 
@@ -839,6 +854,51 @@ webRestApp.controller('WaitingToEvolveController', ['$scope','$http','$rootScope
   }
 }]);
 
-webRestApp.controller('MerchantCornerController', ['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+webRestApp.controller('MerchantCornerController',['$scope','$location', function($scope, $location){
+  $scope.placeItemOnAuction = function(){
+    $location.path('/place_item_on_auction');
+  }
+  $scope.yourAuctionPage = function(){
+    $location.path('/your_auction_page');
+  }
+}]);
 
+webRestApp.controller('PlaceItemOnAuctionController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  if($rootScope.Singleton.YouUser.cards === undefined || $rootScope.Singleton.YouUser.cards == 0){
+    $location.path('/insert_credit_card');
+  }else{
+
+  }
+}]);
+
+webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+
+}]);
+
+webRestApp.controller('InsertCreditCardController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.creditCardNumber="";
+  $scope.creditCardPin="";
+  $scope.addCard = function(){
+    $scope.tempUser = {
+      username: $rootScope.Singleton.YouUser.username,
+      password: $rootScope.Singleton.YouUser.password,
+      uType: $rootScope.Singleton.YouUser.uType,
+      cards: []
+    };
+    $scope.tempUser.cards.push({
+      number: $scope.creditCardNumber,
+      pin: $scope.creditCardPin
+    });
+    var formatedUser = angular.toJson($scope.tempUser);
+    userConfig.addCard(formatedUser).then(function(response, status){
+      userConfig.overrideCurrentUser(response.data);
+      var formatedCards = angular.toJson($rootScope.Singleton.YouUser.cards);
+      console.log("Deck check: " + formatedCards);
+      if($rootScope.Singleton.YouUser.cards.length==1){
+        $location.path('/place_item_on_auction');
+      }else{
+        $location.path('/merchant_corner');
+      }
+    });
+  }
 }]);

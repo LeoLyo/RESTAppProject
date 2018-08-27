@@ -47,6 +47,9 @@ public class BasicUser extends User {
 	public void setCards(ArrayList<Card> cards) {
 		this.cards = cards;
 	}
+	public void addCard(Card card) {
+		cards.add(card);
+	}
 
 	public ArrayList<Photo> getPhotos() {
 		return photos;
