@@ -49,7 +49,7 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   .when('/waiting_for_validation',{
     templateUrl: 'views/waiting_for_validation.html'
   })
-  .when('.upload_successful',{
+  .when('/upload_successful',{
     templateUrl: 'views/upload_successful.html'
   })
   .when('/test',{
@@ -474,7 +474,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
         test: []
       };
       console.log("No. "+i+" and "+$scope.tempPicUser.test.length);
-      
+
       $scope.tempPicUser.test.push({
         name:  $rootScope.Singleton.YouUser.test[i].name,
         resolution: $rootScope.Singleton.YouUser.test[i].resolution,
@@ -487,7 +487,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
         console.log("Picture no. " + i + " uploaded.");
         if(i==10){
           $rootScope.Singleton.Testing.usersWaitingForGrading.push({
-            name: $rootScope.Singleton.YouUser.username
+            username: $rootScope.Singleton.YouUser.username
           });
           console.log("Users waiting for grading: " + $rootScope.Singleton.Testing.usersWaitingForGrading.length + "QUQU: " + $rootScope.Singleton.Testing.usersWaitingForGrading[0]);
           $location.path('/upload_successful');
@@ -511,11 +511,25 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
     })*/
   }
   $scope.init = function(){
+
     if($rootScope.Singleton.YouUser.activated==false){
         $location.path('/waiting_for_validation');
       console.log('Waiting For Validation redirected successfully!');
     }
+    $scope.person = $rootScope.Singleton.YouUser.username;
+    $scope.exists = false;
+    for(var i=0;i<$rootScope.Singleton.Testing.usersWaitingForGrading.length;i++){
+      if($scope.person==$rootScope.Singleton.Testing.usersWaitingForGrading[i].username){
+        $scope.exists = true;
+        break;
+      }
+    }
+    if($scope.exists==true){
+      $location.path('/upload_successful');
+      console.log('Upload successful redirected successfully!');
+    }
   }
+
   $scope.init();
 
 }]);
