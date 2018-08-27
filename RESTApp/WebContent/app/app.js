@@ -52,9 +52,19 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   .when('/upload_successful',{
     templateUrl: 'views/upload_successful.html'
   })
+  .when('/change_password',{
+    templateUrl: 'views/change_password.html',
+    controller: 'ChangePasswordController'
+  })
   .when('/test',{
     templateUrl: 'views/test.html',
     controller: 'UpgradeTestingController'
+  })
+  .when('/password_changed_successfully',{
+    templateUrl: 'views/password_changed_successfully.html'
+  })
+  .when('/operator_created_successfully',{
+    templateUrl: 'views/operator_created_successfully.html'
   })
   .otherwise({
     redirectTo:'/home'
@@ -100,12 +110,26 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   service.logout = function(){
     return $http.get(urlBase+'/logout');
   };
-  service.startTest = function(stUser){
+
+  /*service.startTest = function(stUser){
     return $http.post(urlBase+'/start-test',stUser);
-  }
+  };*/
+
   service.addTestPicture = function(atpUser){
     return $http.put(urlBase+'/add-test-picture', atpUser);
-  }
+  };
+
+  service.registerOperator = function(roUser){
+    return $http.post(urlBase+'/add-operator', roUser);
+  };
+
+  service.changePassword = function(cpUser){
+    return $http.put(urlBase+'/change-password', cpUser);
+  };
+
+  service.operatorFirstTimeChange = function(oftcUser){
+    return $http.put(urlBase+'/operator-first-time-change', oftcUser);
+  };
 
     return service;
 }]);
@@ -167,15 +191,32 @@ webRestApp.service('multipartForm',['$http', function($http){
 
 webRestApp.controller('HeaderController',['$scope', '$http','$rootScope','userConfig',function($scope, $http, $rootScope, userConfig){
   $scope.currentuser={};
-
+  $scope.userT="";
   $scope.$watch('$root.Singleton.YouUser',function(){
     $scope.currentuser=$rootScope.Singleton.YouUser;
     $scope.refreshHeader();
   });
 
- $scope.refreshHeader = function()
- {
+ $scope.refreshHeader = function(){
    $scope.currentuser=userConfig.copyCurrentuser();
+   if($scope.currentuser.uType == 0){
+     $scope.userT = " | " + ".Basic User.";
+   }
+   else if($scope.currentuser.uType == 1){
+     $scope.userT = " | " + "!Seller!";
+   }
+   else if($scope.currentuser.uType == 2){
+     $scope.userT = " | " + ":O Operator O:"
+   }
+   else if($scope.currentuser.uType == 3){
+     $scope.userT = " | " + "_/¯( ? )_/¯ Admin _/¯( ? )_/¯";
+   }
+   else if($scope.currentuser.uType == 4){
+     $scope.userT = " | " + "<<< Firm >>>"
+   }
+   else{
+     $scope.userT = "";
+   }
    console.log('HEADER REFRESH: '+'username: '+$scope.currentuser.username+'|password: '+$scope.currentuser.password+'|uType: '+$scope.currentuser.uType);
 
    /*
@@ -260,11 +301,14 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$locatio
         userConfig.overrideCurrentUser(response.data);
         console.log('LOGGED IN USER RAW: '+angular.toJson(response.data));
         console.log('LOGGED IN USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
-
-        if($rootScope.Singleton.YouUser.activated==false){
+        if($rootScope.Singleton.YouUser.uType==2 && $rootScope.Singleton.YouUser.firstTime==true){
+          $location.path('/change_password');
+          console.log('REDIRECT TO CHANGE PASSWORD SUCCEEDED!');
+        } else if($rootScope.Singleton.YouUser.uType==0 && $rootScope.Singleton.YouUser.activated==false){
           $location.path('/waiting_for_validation');
-          console.log('REDIRECT TO WAITING SUCCEEDED!')
-        }else{
+          console.log('REDIRECT TO WAITING SUCCEEDED!');
+        }
+        else{
           $location.path('/home');
         console.log('REDIRECT TO LOGIN SUCCEDED!');
         }
@@ -311,7 +355,7 @@ webRestApp.controller('RegisterController',['$scope','$http', 'userConfig','$loc
     var formatedUser=angular.toJson($scope.newuser);
     userConfig.register(formatedUser).then(function(formatedUser,status){
       console.log('New user registered successfully!');
-      $location.path('/login');
+      $location.path('/waiting_for_validation');
       console.log('Waiting For Validation redirected successfully!');
     }, function(response){
       $scope.errorMessage=response.data;
@@ -337,14 +381,53 @@ webRestApp.controller('LogoutController',['$scope','$http','$rootScope', 'userCo
   init();
 }]);
 
-webRestApp.controller('AddOperatorController',['$scope',function($scope){
-  $scope.username = "";
-  $scope.password = "";
+webRestApp.controller('AddOperatorController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
+  $scope.opusername = "";
+  $scope.oppassword = "";
   $scope.addOperator=function(){
-
+    $scope.newOperator = {
+      username: $scope.opusername,
+      password: $scope.oppassword
+    };
+    var formatedUser=angular.toJson($scope.newOperator);
+    console.log("Operator check: " + formatedUser);
+    userConfig.registerOperator(formatedUser).then(function(formatedUser,status){
+      console.log('New operator registered successfully!');
+      $location.path('/operator_created_successfully');
+      console.log('Login redirected successfully!');
+    });
   };
 }]);
 
+webRestApp.controller('ChangePasswordController',['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
+  $scope.cpfirst = "";
+  $scope.cpsecond = "";
+  $scope.changeMessage = "Passwords must match.";
+  $scope.showChangeMessage = false;
+  $scope.changePassword = function(){
+    if($scope.cpfirst!=$scope.cpsecond){
+      $scope.showChangeMessage = true;
+    }else{
+      $scope.showChangeMessage = false;
+      $scope.changedOperator = {
+        username: $rootScope.Singleton.YouUser.username,
+        password: $scope.cpfirst
+      };
+      var formatedUser = angular.toJson($scope.changedOperator);
+      userConfig.changePassword(formatedUser).then(function(fr, status){
+        console.log("Password changed successfully.");
+        if($rootScope.Singleton.YouUser.uType==2 && $rootScope.Singleton.YouUser.firstTime==true){
+          userConfig.operatorFirstTimeChange(formatedUser).then(function(newfr,newstatus){
+            console.log("Operator's first time changed successfully.");
+            $rootScope.Singleton.YouUser.firstTime=false;
+          });
+        };
+        $location.path('/password_changed_successfully');
+        console.log("Password changed successfully redirected, wellp, successfully. _/¯( ? )_/¯");
+      });
+    };
+  }
+}]);
 
 
 

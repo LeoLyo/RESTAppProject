@@ -74,11 +74,14 @@ public class LoginService {
 		
 		User loggedUser = userDao.find(ud.getUsername().toLowerCase(), ud.getPassword());
 		if (loggedUser == null) {
+			System.out.println("Login: nobody in users");
 			loggedUser = operatorDao.find(ud.getUsername().toLowerCase(), ud.getPassword());
 			if (loggedUser == null) {
+				System.out.println("Login: nobody in operators");
 				loggedUser = adminDao.find(ud.getUsername().toLowerCase(), ud.getPassword());
 				if (loggedUser == null) {
-					return Response.status(400).entity("Invalid username and/or password").build();
+					System.out.println("Login: nobody in admins");
+					return Response.status(400).entity("Invalid username and/or password. Couldn't find user. Sorry.").build();
 				}
 			}		
 		}
@@ -103,7 +106,7 @@ public class LoginService {
 		}
 
 		if (!ud.getUsername().matches("^(?=.{3,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$")) {
-			return Response.status(400).entity("Invalid username format!").build();
+			return Response.status(400).entity("Invalid username format! Bloody regex.").build();
 		}
 
 		if (ud.getEmail().matches("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\\\.[A-Z]{2,6}$")) {
@@ -176,7 +179,9 @@ public class LoginService {
 		}
 
 		Operator nOp = new Operator(ud.getUsername().toLowerCase(), ud.getPassword());
+		
 		if (operatorDao.add(nOp)) {
+			System.out.println("Operator: " + nOp.getUsername() + " | " + nOp.getPassword());
 			return Response.ok(nOp).build();
 
 		} else {
@@ -299,7 +304,7 @@ public class LoginService {
 	public Response addTestPicture(BasicUser us, @Context HttpServletRequest request) {
 		//ankh.lock();
 		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
-		System.out.println("JEbo amter: "+us.getUsername());
+		//System.out.println("Butterfly: "+us.getUsername());
 		BasicUser target = dao.find(us.getUsername());
 		
 		if (! (target.getuType() == 0)||target==null) {
@@ -309,13 +314,70 @@ public class LoginService {
 		}
 		 else {
 			target.addPictureToTest(us.getTest().get(0));
-			System.out.println("RAKOMIR TRENUTNO: " + target.getUsername()+" | " + target.getTest().size() + " | " + target.getTest().toString());
+			System.out.println("RAKOMIR SLIKA: " + target.getUsername()+" | " + target.getTest().size() + " | " + target.getTest().toString());
 			//ankh.unlock();
 			return Response.status(200).build();
 
 		}
 	}
 
+	@PUT
+	@Path("/change-password")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response changePassword(User us, @Context HttpServletRequest request) {
+		BasicUserDAO udao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		OperatorDAO oDao = (OperatorDAO) ctx.getAttribute("operatorDAO");
+		AdminDAO aDao = (AdminDAO) ctx.getAttribute("adminDAO");
+		
+		System.out.println("Bee: "+us.getUsername());
+		User target = udao.find(us.getUsername());
+		if (target==null) {
+			System.out.println("Not a user.");
+			target = oDao.find(us.getUsername());
+			if(target==null) {
+				System.out.println("Not an operator.");
+				target = aDao.find(us.getUsername());
+				if(target==null) {
+					System.out.println("Not an admin. Well, bloody hell..");
+					return Response.status(400).build();
+				}
+			}
+		}
+		 
+			System.out.println("RAKOMIR NEKADA: " + target.getUsername()+" | " + target.getPassword());
+			target.setPassword(us.getPassword());
+			System.out.println("RAKOMIR TRENUTNO: " + target.getUsername()+" | " + target.getPassword());
+			return Response.status(200).build();
+
+		
+	}
+	
+	@PUT
+	@Path("/operator-first-time-change")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response operatorFirstTimeChange(Operator op, @Context HttpServletRequest request) {
+		OperatorDAO dao = (OperatorDAO) ctx.getAttribute("operatorDAO");
+		System.out.println("Owl: "+op.getUsername());
+		Operator target = dao.find(op.getUsername());
+		
+		if(target==null) {
+			System.out.println("Target is null.");
+			return Response.status(400).build();
+
+		}
+		else if (!(target.isFirstTime())) {
+			System.out.println("Not the operator's first time.");
+			return Response.status(400).build();
+		}
+		 else {
+			target.setFirstTime(false);
+			System.out.println("RAKOMIR NIJE VISE PRVI PUT: " + target.getUsername()+" | " + target.getPassword() + " | " + target.isFirstTime());
+			return Response.status(200).build();
+
+		}
+	}
 	
 	
 	@POST
