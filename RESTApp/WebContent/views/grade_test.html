@@ -1,0 +1,21 @@
+<div class="content">
+  <h1>WELCOME, OPERATOR. PLEASE GRADE PEASANT {{peasantUser.username}}.</h2>
+  <ol>
+    <li ng-repeat="file in peasantUser.test">
+      <img ng-src="{{file.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
+      <h3>{{file.name}}</h3>
+      <h3>{{file.resolution}}</h3>
+        <select class="selectGradeDrop" ng-model="file.grade" id="gradesEvolve">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+        </select>
+    </li>
+  </ol>
+  <h4 style="float:right;">Total score: {{result}}</h4>
+  <button ng-click="finalizeGrading(image)" style="margin:12px 0 0 0">Finalize grading</button>
+  <button ng-click="refreshTotalGrade()" style="float:right; margin:12px 12px 0 0; ">Refresh total grade</button>
+</div>
