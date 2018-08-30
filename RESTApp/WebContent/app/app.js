@@ -114,6 +114,13 @@ webRestApp.config(['$routeProvider',function($routeProvider){
     templateUrl: 'views/insert_credit_card.html',
     controller: 'InsertCreditCardController'
   })
+  .when('/block_users',{
+    templateUrl: 'views/block_users.html',
+    controller: 'BlockUsersController'
+  })
+  .when('/blocked',{
+    templateUrl: 'views/blocked.html'
+  })
   .otherwise({
     redirectTo:'/home'
   });
@@ -159,11 +166,7 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
     return $http.get(urlBase+'/logout');
   };
 
-  /*service.startTest = function(stUser){
-    return $http.post(urlBase+'/start-test',stUser);
-  };*/
-
-  service.addTestPicture = function(atpUser){
+    service.addTestPicture = function(atpUser){
     return $http.put(urlBase+'/add-test-picture', atpUser);
   };
 
@@ -182,12 +185,27 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   service.findUser = function(fUser){
     return $http.put(urlBase+'/find-user', fUser);
   };
+
   service.evolveUser = function(eUser){
     return $http.put(urlBase+'/evolve', eUser);
   };
+
   service.addCard = function(acUser){
     return $http.post(urlBase+'/add-card', acUser);
-  }
+  };
+
+  service.getAllUsers = function(){
+    return $http.get(urlBase+'/users');
+  };
+  service.getAllOUsers = function(){
+    return $http.get(urlBase+'/ousers');
+  };
+  service.blockUser = function(bUser){
+    return $http.put(urlBase+'/block',bUser);
+  };
+  service.unblockUser = function(uUser){
+    return $http.put(urlBase+'/unblock',uUser);
+  };
     return service;
 }]);
 
@@ -320,7 +338,7 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
 
   $scope.testingMethod=function(){
 
-    console.log("TESTING METHOD: " + $rootScope.Singleton.Testing.usersWaitingForEvolving[0].username);
+    console.log("TESTING METHOD: " + $rootScope.Singleton.YouUser.isBlocked);
   };
 
 
@@ -365,6 +383,10 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$locatio
         } else if($rootScope.Singleton.YouUser.uType==0 && $rootScope.Singleton.YouUser.activated==false){
           $location.path('/waiting_for_validation');
           console.log('REDIRECT TO WAITING SUCCEEDED!');
+        }
+        else if(($rootScope.Singleton.YouUser.uType==0 || $rootScope.Singleton.YouUser.uType==1) && $rootScope.Singleton.YouUser.blocked==true){
+          $location.path('/blocked');
+          console.log('REDIRECT TO BLOCKED SUCCEDED!');
         }
         else{
           $location.path('/home');
@@ -760,6 +782,10 @@ webRestApp.controller('OperatorModeController', ['$scope','$location', function(
   $scope.whosePicsToApprove = function(){
     $location.path('/whose_pics_to_approve');
   }
+
+  $scope.blockUsers = function(){
+    $location.path('/block_users');
+  }
 }]);
 
 webRestApp.controller('WhoToTestController', ['$scope','$rootScope','$location', function($scope, $rootScope, $location){
@@ -901,4 +927,72 @@ webRestApp.controller('InsertCreditCardController',['$scope','$http','$rootScope
       }
     });
   }
+}]);
+
+webRestApp.controller('BlockUsersController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+
+  $scope.users = "";
+
+  $scope.init = function(){
+    console.log("UPDATED QUACKS");
+    userConfig.getAllOUsers().then(function(response){
+      $scope.users = response.data;
+      console.log("QUAXCK: " + $scope.users);
+      console.log("NEXT: " + $scope.users[0].username);
+    });
+  }
+
+
+  $scope.type = function(user){
+    if(user.uType == 0){
+      return "Peasant";
+    }
+    else if(user.uType == 1){
+      return "Merchant";
+    }
+    else{
+      return "Void";
+    }
+  };
+
+  $scope.whatToDo = function(user){
+    if(user.blocked==true){
+      return "block";
+    }
+    else{
+      return "unblock";
+    }
+  };
+
+  $scope.blockUser = function(user){
+    $scope.tempUser = {
+      username: user.username,
+      password: "temp",
+      uType: user.uType
+    };
+    var formatedUser = angular.toJson($scope.tempUser);
+    userConfig.blockUser(formatedUser).then(function(respone,status){
+      user.blocked = true;
+      console.log("[B] Current user block status: " + user.username + ", " + user.blocked);
+    });
+  }
+  $scope.unblockUser = function(user){
+    $scope.tempUser = {
+      username: user.username,
+      password: "temp",
+      uType: user.uType
+    };
+    var formatedUser = angular.toJson($scope.tempUser);
+    userConfig.unblockUser(formatedUser).then(function(respone,status){
+      user.blocked = false;
+      console.log("[UB] Current user block status: " + user.username + ", " + user.blocked);
+    });
+  }
+
+$scope.init();
+
+}]);
+
+webRestApp.controller('TemplateController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+	$scope.template=1;
 }]);

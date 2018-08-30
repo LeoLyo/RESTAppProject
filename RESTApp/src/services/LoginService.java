@@ -274,7 +274,7 @@ public class LoginService {
 	
 	//NEEDS FIXING ?? NAH BRAH
 	
-	@GET
+	@PUT
 	@Path("/verify")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -445,8 +445,75 @@ public class LoginService {
 	}
 	*/
 	
+	@PUT
+	@Path("/block")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response blockUser(User us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(us.getUsername());
+		User current = (User) request.getSession().getAttribute("user");
+
+		if ((current.getuType() != 2) && (target.getuType() == 3|| target.getuType() == 2 || target==null)) {
+			return Response.status(400).build();
+		}
+		 else {
+				target.setBlocked(true);
+				System.out.println("KHM: " + target.getUsername()+", "+target.getuType()+", now is blocked: "+target.isBlocked());
+				return Response.status(200).build();
+		
+		}
+	}
+	
+	@PUT
+	@Path("/unblock")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response unblockUser(User us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(us.getUsername());
+		User current = (User) request.getSession().getAttribute("user");
+
+		if ((current.getuType() != 2) && (target.getuType() == 3|| target.getuType() == 2 || target==null)) {
+			return Response.status(400).build();
+		}
+		 else {
+			 	target.setBlocked(false);
+				System.out.println("WEQ: " + target.getUsername()+", "+target.getuType()+", now is blocked: "+target.isBlocked());
+				return Response.status(200).build();
+
+			
+		}
+	}
 	
 	
+	
+	
+	@GET
+	@Path("/ousers")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getOusers(@Context HttpServletRequest request) {
+		User current = (User) request.getSession().getAttribute("user");
+		
+		if (current == null) {
+			System.out.println("o >>");
+			return Response.status(400).build();
+			
+		}
+
+		if (current.getuType() == 2) {
+			Collection<BasicUser> allOperatorUsers= ((BasicUserDAO) ctx.getAttribute("userDAO")).findAll();
+			return Response.ok(allOperatorUsers).build();
+		} else {
+			System.out.println("Unknown ousers error");
+			return Response.status(400).build();
+		}
+
+	}
+	
+	
+	
+	//Does not work for some reason
 	@GET
 	@Path("/users")
 	@Produces(MediaType.APPLICATION_JSON)

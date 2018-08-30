@@ -121,6 +121,30 @@ main{
   cursor: pointer;
   margin-left: 10px;
 }
+.block{
+  float: right;
+  border-radius: 50%;
+  border: 2px solid #4CAF50;
+  background-color: FireBrick;
+  padding: 5px;
+  width: auto;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 10px;
+}
+.unblock{
+  float: left;
+  border-radius: 50%;
+  border: 2px solid #4CAF50;
+  background-color: ForestGreen;
+  padding: 5px;
+  width: auto;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 10px;
+}
 
 .selectGradeDrop{
   float: right;

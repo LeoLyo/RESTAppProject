@@ -9,6 +9,7 @@ public class BasicUser extends User {
 	private String email;
 	private String country;
 	private Cart cart;
+	private boolean blocked;
 	
 	private ArrayList<Photo> test = new ArrayList<Photo>();
 	private ArrayList<Card> cards = new ArrayList<Card>();
@@ -18,14 +19,26 @@ public class BasicUser extends User {
 
 	public BasicUser() {
 		super();
+		blocked=false;
 	}
 	
 	public BasicUser(String username, String password, String email, String country) {
 		super(username,password);
 		this.email = email;
 		this.country = country;
+		blocked=false;
 	}
 
+	
+	
+	
+	public boolean isBlocked() {
+		return blocked;
+	}
+
+	public void setBlocked(boolean blocked) {
+		this.blocked = blocked;
+	}
 
 	public String getEmail() {
 		return email;
