@@ -9,7 +9,8 @@ public class Photo {
 	private String id;
 	private String name;
 	private Double price;
-	private String resolution;
+	private String originalWidth;
+	private String originalHeight;
 	private String byteArray;
 	private String owner;
 	private String category;
@@ -60,13 +61,18 @@ public class Photo {
 	public void setPrice(Double price) {
 		this.price = price;
 	}
-	public String getResolution() {
-		return resolution;
+	public String getOriginalWidth() {
+		return originalWidth;
 	}
-	public void setResolution(String resolution) {
-		this.resolution = resolution;
+	public void setOriginalWidth(String originalWidth) {
+		this.originalWidth = originalWidth;
 	}
-	
+	public String getOriginalHeight() {
+		return originalHeight;
+	}
+	public void setOriginalHeight(String originalHeight) {
+		this.originalHeight = originalHeight;
+	}
 	public String getOwner() {
 		return owner;
 	}

@@ -30,7 +30,8 @@ webRestApp.run(function($rootScope){
         category:"",
         description:"",
         location:"",
-        resolution:"",
+        originalWidth:"",
+        originalHeight:"",
         price:"",
         byteArray:""
       }
@@ -580,13 +581,15 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
           $scope.tempImage={
             name: "",
             byteArray: "",
-            resolution: ""
+            originalWidth: "",
+            originalHeight: ""
           };
           //console.log("NEW RAK: " + image.src);
           console.log("ENTERED ONLOAD OF IMAGE");
           //console.log("AOA: " + file.name + " | " + image.width + " | " + image.height);
           $scope.tempImage.name = file.name;
-          $scope.tempImage.resolution = image.width+"x"+image.height;
+          $scope.tempImage.originalWidth = image.width;
+          $scope.tempImage.originalHeight = image.height;
           $scope.tempImage.byteArray = image.src;
 
 
@@ -595,7 +598,8 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
         $rootScope.Singleton.YouUser.test.push({
         name: $scope.tempImage.name,
-        resolution: $scope.tempImage.resolution,
+        originalWidth: $scope.tempImage.originalWidth,
+        originalHeight: $scope.tempImage.originalHeight,
         byteArray: $scope.tempImage.byteArray,
         grade: 0
       });
@@ -660,7 +664,8 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
       $scope.tempPicUser.test.push({
         name:  $rootScope.Singleton.YouUser.test[i].name,
-        resolution: $rootScope.Singleton.YouUser.test[i].resolution,
+        originalWidth: $rootScope.Singleton.YouUser.test[i].originalWidth,
+        originalHeight: $rootScope.Singleton.YouUser.test[i].originalWidth,
         byteArray: $rootScope.Singleton.YouUser.test[i].byteArray,
         grade: 0
       });
@@ -923,8 +928,18 @@ webRestApp.controller('PlaceItemOnAuctionController',['$scope','$http','$rootSco
       reader.addEventListener("load",function(){
         var image = new Image();
         image.src=reader.result;
-        $rootScope.Singleton.Preparations.newImage.byteArray=image.src;
-        console.log("Merchant Image: " + $rootScope.Singleton.Preparations.newImage.name + ", " + $rootScope.Singleton.Preparations.newImage.category + ", " + $rootScope.Singleton.Preparations.newImage.description + ", " + $rootScope.Singleton.Preparations.newImage.location + ", " + $rootScope.Singleton.Preparations.newImage.byteArray);
+        image.onload=function(){
+          $rootScope.Singleton.Preparations.newImage.byteArray=image.src;
+          $rootScope.Singleton.Preparations.newImage.originalWidth=image.width;
+          $rootScope.Singleton.Preparations.newImage.originalHeight=image.height;
+          console.log("Merchant Image: " + $rootScope.Singleton.Preparations.newImage.name + ", "
+           + $rootScope.Singleton.Preparations.newImage.category + ", "
+           + $rootScope.Singleton.Preparations.newImage.description + ", "
+           + $rootScope.Singleton.Preparations.newImage.location + ", "
+           + $rootScope.Singleton.Preparations.newImage.originalWidth + ", "
+           + $rootScope.Singleton.Preparations.newImage.originalHeight + ", "
+           + $rootScope.Singleton.Preparations.newImage.byteArray);
+        }
       },false);
       if($scope.files[0]){
         reader.readAsDataURL($scope.files[0]);
