@@ -4,7 +4,7 @@
    <button ng-click="clearList()" ng-disabled="Singleton.YouUser.test.length<1" style="margin: 0 12px 0; float: right;">Remove All</button>
    <h2>HAIL RAK</h2>
   <form name="testPicsForm" ng-submit="evolveUser()" novalidate>
-    <label for="pictureUploadInput">Picture for evolving (testing)</label>
+    <label for="pictureUploadInput">Picture for evolving</label>
     <input type="file" id="pictureUploadInput" ng-hide="Singleton.YouUser.test.length>=10" accept="image/*" file-input="files" multiple/>
     <input type="submit" value="Attach" ng-disabled="rakometer==true || Singleton.YouUser.test.length>=10">
   </form>
@@ -14,7 +14,7 @@
       <img ng-src="{{file.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
       <h3>{{file.name}}</h3>
       <h3>{{file.resolution}}</h3>
-        <select class="selectGradeDrop" ng-model="file.grade" id="gradesEvolve" ng-disabled="1>0">
+        <select class="selectGradeDrop" ng-model="file.grade" id="gradesEvolve" ng-disabled="Singleton.YouUser.uType!=2">
           <option value="0">0</option>
           <option value="1">1</option>
           <option value="2">2</option>
@@ -26,5 +26,5 @@
     </li>
   </ol>
   <h4>Total score: {{result}}</h4>
-  <button ng-click="uploadTest()" ng-disabled="Singleton.YouUser.test.length<10" style="float: center;">Upload</button>
+  <button ng-click="uploadTest()" ng-disabled="Singleton.YouUser.test.length<10">Upload</button>
 </div>

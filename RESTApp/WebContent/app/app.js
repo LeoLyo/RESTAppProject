@@ -13,9 +13,31 @@ webRestApp.run(function($rootScope){
       usersFailedAtEvolving:[],
       usersWaitingForEvolving:[],
       usersSucceededAtEvolving:[]
+    },
+    Preparations:{
+      approveStatuses:[
+        {
+          value: "D",
+          name: "Denied"
+        },
+        {
+          value:"A",
+          name: "Approved"
+        }
+      ],
+      newImage:{
+        name:"",
+        category:"",
+        description:"",
+        location:"",
+        resolution:"",
+        price:"",
+        byteArray:""
+      }
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
+  console.log(angular.toJson($rootScope.Singleton));
 });
 
 webRestApp.config(['$routeProvider',function($routeProvider){
@@ -120,6 +142,10 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   })
   .when('/blocked',{
     templateUrl: 'views/blocked.html'
+  })
+  .when('/place_item_on_auction_step_two',{
+    templateUrl: 'views/place_item_on_auction_step_two.html',
+    controller: 'PlaceItemOnAuctionStepTwoController'
   })
   .otherwise({
     redirectTo:'/home'
@@ -337,8 +363,8 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
   };
 
   $scope.testingMethod=function(){
-
-    console.log("TESTING METHOD: " + $rootScope.Singleton.YouUser.isBlocked);
+    $rootScope.Singleton.Preparations.newImage.byteArray="ggh";
+    console.log("TESTING METHOD: " + $rootScope.Singleton.YouUser.isBlocked + ", " + $rootScope.Singleton.Preparations.newImage.byteArray);
   };
 
 
@@ -524,7 +550,6 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
     angular.forEach($scope.files, function(file){
 
 
-      var breader = new FileReader();
       var reader = new FileReader();
 
 
@@ -565,8 +590,6 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
           $scope.tempImage.byteArray = image.src;
 
 
-        $scope.formatTest = angular.toJson($rootScope.Singleton.YouUser.test);
-        //console.log("RAKSON: " + $scope.formatTest);
         //console.log("RAK IS ALWAYS WITH US: " +   $scope.Test[$scope.count-1]);
         //console.log("QUAAA: "+$scope.Test[$scope.count-1].name+" | "+$scope.Test[$scope.count-1].resolution+" | "+"imagine a byte array");
 
@@ -589,8 +612,6 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
           resolution: $scope.tempImage.resolution,
           byteArray: $scope.tempImage.byteArray
         });
-        $scope.formatTest = angular.toJson($scope.Test);
-        console.log("RAKSON: " + $scope.formatTest);
         console.log("RAK IS ALWAYS WITH US: " +   $scope.Test[$scope.count-1]);
         console.log("QUAAA: "+$scope.Test[$scope.count-1].name+" | "+$scope.Test[$scope.count-1].resolution+" | "+"imagine a byte array");*/
 
@@ -598,7 +619,6 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
       if(file){
         reader.readAsDataURL(file);
-        breader.readAsArrayBuffer(file);
       }
 
     })
@@ -890,15 +910,51 @@ webRestApp.controller('MerchantCornerController',['$scope','$location', function
 }]);
 
 webRestApp.controller('PlaceItemOnAuctionController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.rakometer = false;
   if($rootScope.Singleton.YouUser.cards === undefined || $rootScope.Singleton.YouUser.cards == 0){
     $location.path('/insert_credit_card');
   }else{
+    $scope.dimageMessage = $rootScope.Singleton.YouUser.dimage + "/3 images have been sent for approval today. ";
+    $scope.wimageMessage = $rootScope.Singleton.YouUser.wimage + "/8 images have been sent for approval this week. ";
 
+    $scope.applyInfo = function(){
+      $scope.rakometer=true;
+        var reader = new FileReader();
+      reader.addEventListener("load",function(){
+        var image = new Image();
+        image.src=reader.result;
+        $rootScope.Singleton.Preparations.newImage.byteArray=image.src;
+        console.log("Merchant Image: " + $rootScope.Singleton.Preparations.newImage.name + ", " + $rootScope.Singleton.Preparations.newImage.category + ", " + $rootScope.Singleton.Preparations.newImage.description + ", " + $rootScope.Singleton.Preparations.newImage.location + ", " + $rootScope.Singleton.Preparations.newImage.byteArray);
+      },false);
+      if($scope.files[0]){
+        reader.readAsDataURL($scope.files[0]);
+      }
+    };
+    $scope.nextStepOfficially = function(){
+      console.log("badumpts");
+      $location.path("/place_item_on_auction_step_two");
+    }
   }
 }]);
 
-webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+webRestApp.controller('PlaceItemOnAuctionStepTwoController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
 
+
+}]);
+
+webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.rakometer=false;
+  $scope.calculateApprovedWares = function(){
+    var result=0;
+    for(var i=0;i<$rootScope.Singleton.YouUser.photos.length;i++){
+      if($rootScope.Singleton.YouUser[i].approved==true){
+        result++;
+      }
+      return result;
+    }
+  }
+  $scope.approvedWares = $scope.calculateApprovedWares();
+  $scope.imageMessage="Approved wares: " + $scope.approvedWares +", meanwhile wares awaiting for approval: " + $rootScope.Singleton.YouUser.photos.size - $scope.approvedWares;
 }]);
 
 webRestApp.controller('InsertCreditCardController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){

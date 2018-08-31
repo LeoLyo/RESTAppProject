@@ -10,6 +10,9 @@ public class BasicUser extends User {
 	private String country;
 	private Cart cart;
 	private boolean blocked;
+	private long timer;
+	private int dimage;
+	private int wimage;
 	
 	private ArrayList<Photo> test = new ArrayList<Photo>();
 	private ArrayList<Card> cards = new ArrayList<Card>();
@@ -32,6 +35,31 @@ public class BasicUser extends User {
 	
 	
 	
+
+	public int getDimage() {
+		return dimage;
+	}
+
+	public void setDimage(int dimage) {
+		this.dimage = dimage;
+	}
+
+	public int getWimage() {
+		return wimage;
+	}
+
+	public void setWimage(int wimage) {
+		this.wimage = wimage;
+	}
+
+	public long getTimer() {
+		return timer;
+	}
+
+	public void setTimer(long timer) {
+		this.timer = timer;
+	}
+
 	public boolean isBlocked() {
 		return blocked;
 	}

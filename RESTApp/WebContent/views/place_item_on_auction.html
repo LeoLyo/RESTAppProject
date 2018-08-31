@@ -1,3 +1,24 @@
 <div class="content">
-  <h1>Placing item on auction.</h1>
+  <h1>Placing item on auction: Step One.</h1>
+  <form name="ImageUploadForm" ng-submit="applyInfo()" novalidate>
+    <label for="saleImageInput">Add new photograph for sale</label>
+    <input type="file" id="saleImageInput" ng-hide="Singleton.YouUser.dimage>=3 || Singleton.YouUser.wimage>=8" accept="image/*" file-input="files" style="width:70%" />
+    <input type="text" name=imageName ng-model="Singleton.Preparations.newImage.name" placeholder="Enter photograph name" style="width:70%" ng-required="true"/>
+    <div ng-show="ImageUploadForm.imageName.$touched && ImageUploadForm.imageName.$invalid">
+      <small style="color: red; display: block; text-align: center;">Enter a name</small>
+    </div>
+    <input type="text" name=imageCategory ng-model="Singleton.Preparations.newImage.category" placeholder="Enter photograph category" style="width:70%" ng-required="true"/>
+    <div ng-show="ImageUploadForm.imageCategory.$touched && ImageUploadForm.imageCategory.$invalid">
+      <small style="color: red; display: block; text-align: center;">Enter a name for category</small>
+    </div>
+    <input type="text" name=imageDescription ng-model="Singleton.Preparations.newImage.description" placeholder="Enter photograph description" style="width:70%" ng-required="true"/>
+    <div ng-show="ImageUploadForm.imageDescription.$touched && ImageUploadForm.imageDescription.$invalid">
+      <small style="color: red; display: block; text-align: center;">Enter a description</small>
+    </div>
+    <input type="text" name=imageLocation ng-model="Singleton.Preparations.newImage.location" placeholder="Enter location where the photograph was taken" style="width:70%"/>
+    <input type="submit" value="Apply info"  ng-disabled= "rakometer==true || Singleton.YouUser.dimage>=3 || Singleton.YouUser.wimage>=8">
+</form>
+  <h4>{{dimageMessage}}</h4>
+  <h4>{{wimageMessage}}</h4>
+  <button ng-disabled = "rakometer==false" ng-click="nextStepOfficially()">Next step</button>
 </div>

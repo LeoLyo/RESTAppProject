@@ -16,6 +16,8 @@ public class Photo {
 	private String description;
 	private int grade;
 	private int purchases = 0;
+	private boolean approved = false;
+	
 	private HashMap<String, Integer> grades = new HashMap<String,Integer>();
 	private ArrayList<Comment> comments = new ArrayList<Comment>();
 	
@@ -26,6 +28,20 @@ public class Photo {
 	
 	
 	
+	public boolean isApproved() {
+		return approved;
+	}
+
+
+
+
+	public void setApproved(boolean approved) {
+		this.approved = approved;
+	}
+
+
+
+
 	public String getId() {
 		return id;
 	}
