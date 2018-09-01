@@ -1,11 +1,11 @@
 <div class="content">
   <h1>Insert credit card for wages.</h1>
   <form name="insertCardForm" ng-submit="addCard()" novalidate>
-    <input type="number" name=cardNumber ng-model="creditCardNumber" style="width:50% " placeholder="Enter card number" ng-required="true"/>
+    <input type="number" min="1" name=cardNumber ng-model="creditCardNumber" style="width:50% " placeholder="Enter card number" ng-required="true"/>
     <div ng-show="insertCardForm.cardNumber.$touched && insertCardForm.cardNumber.$invalid">
       <small style="color: red; display: block; text-align: center;">Enter a card number</small>
     </div>
-    <input type="number" name=cardPin ng-model="creditCardPin" style="width:50% " placeholder="Enter card pin" ng-required="true"/>
+    <input type="number" min="1" max="9999" name=cardPin ng-model="creditCardPin" style="width:50% " placeholder="Enter card pin" ng-required="true"/>
     <div ng-show="insertCardForm.cardPin.$touched && insertCardForm.cardPin.$invalid">
       <small style="color: red; display: block; text-align: center;">Enter a pin</small>
     </div>

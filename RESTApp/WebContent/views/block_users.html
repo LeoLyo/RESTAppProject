@@ -3,8 +3,8 @@
   <ul id = "busers_list">
     <li ng-repeat="user in users">
       <h3 style="font: bold;">{{user.username}}, who is a {{type(user)}}, is currently {{whatToDo(user)}}ed</h3>
-      <button id=blockButton style="float:right; margin-left: 12px; background-color:FireBrick; color: white;" ng-disabled="'file.blocked'==true" ng-click="blockUser(user)">Block</button>
-      <button id=unblockButton  style="float:right; margin-left: 12px; background-color:ForestGreen; color:white;" ng-disabled="'file.blocked'==false" ng-click="unblockUser(user)">Unblock</button>
+      <button id=blockButton style="float:right; margin-left: 12px; background-color:FireBrick; color: white;" ng-disabled="user.blocked==true" ng-click="blockUser(user)">Block</button>
+      <button id=unblockButton  style="float:right; margin-left: 12px; background-color:ForestGreen; color:white;" ng-disabled="user.blocked==false" ng-click="unblockUser(user)">Unblock</button>
     </li>
   </ul>
 </div>

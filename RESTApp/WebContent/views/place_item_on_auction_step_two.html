@@ -1,7 +1,17 @@
 <div class="content">
   <h1>Placing item on auction: Step Two</h1>
-  <form name="chooseResAndPriceForm" ng-submit="chooseResAndPrice()" novalidate>
-    <ol id="res-price-list">
-    </ol>
-  </form>
+  <h2>Please select the resolution and price for your future merch.</h2>
+  <h2>Providing merch with multiple resolutions and prices is allowed</h2>
+  <form name="RPForm" novalidate>
+      <ol id="res-price-list">
+        <li ng-repeat="photographResolution in Singleton.Preparations.newImage.resolutions">
+          <h3>{{photographResolution.name}}</h3>
+          <h6>Price range: {{resPriceRanges[$index].min}}$ - {{resPriceRanges[$index].max}}$</h6>
+          <input type="number" ng-value="{{resPriceRanges[$index].min}}" min="{{resPriceRanges[$index].min}}" max="{{resPriceRanges[$index].max}}"  ng-model=photographResolution.price placeholder="Enter price between {{resPriceRanges[$index].min}}$ and {{resPriceRanges[$index].max}}$" ng-required="true"/>
+          <input type="checkbox" ng-model="resPriceRanges[$index].isChecked" ng-change="inquiryCheckboxStatus()"/>
+        </li>
+      </ol>
+    </form>
+    <h3 style="color: red; display: block; text-align: center;">{{uncheckedMessage}}</h3>
+  <button ng-click="sendForApproval()" ng-disabled="cbStatus==false && RPForm.$invalid">Send for approval</button>
 </div>

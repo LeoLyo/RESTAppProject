@@ -33,8 +33,35 @@ webRestApp.run(function($rootScope){
         originalWidth:"",
         originalHeight:"",
         price:"",
-        byteArray:""
-      }
+        byteArray:"",
+        resolutions:[]
+      },
+      standardResolutions:[
+        {
+          name:"SVGA",
+          width:"800",
+          height:"600",
+          price:0
+        },
+        {
+          name:"HD",
+          width:"1360",
+          height:"768",
+          price:0
+        },
+        {
+          name:"FULL HD",
+          width:"1920",
+          height:"1080",
+          price:0
+        },
+        {
+          name:"4K",
+          width:"3840",
+          height:"2160",
+          price:0
+        }
+      ]
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -946,6 +973,27 @@ webRestApp.controller('PlaceItemOnAuctionController',['$scope','$http','$rootSco
       }
     };
     $scope.nextStepOfficially = function(){
+      for(var i=0;i<$rootScope.Singleton.Preparations.standardResolutions.length;i++){
+        if($rootScope.Singleton.Preparations.newImage.originalWidth<$rootScope.Singleton.Preparations.standardResolutions[i].width){
+          break;
+        }else{
+          $rootScope.Singleton.Preparations.newImage.resolutions.push($rootScope.Singleton.Preparations.standardResolutions[i]);
+        }
+      }
+      $scope.length=$rootScope.Singleton.Preparations.newImage.resolutions.length;
+      if($scope.length>0 && $rootScope.Singleton.Preparations.newImage.resolutions[$scope.length-1].width==$rootScope.Singleton.Preparations.newImage.originalWidth &&
+        $rootScope.Singleton.Preparations.newImage.resolutions[$scope.length-1].height==$rootScope.Singleton.Preparations.newImage.originalHeight){
+        $scope.newName=$rootScope.Singleton.Preparations.newImage.resolutions[$scope.length-1].name + " (Original resolution)";
+        $rootScope.Singleton.Preparations.newImage.resolutions[$scope.length-1].name=$scope.newName;
+      }else{
+        $rootScope.Singleton.Preparations.newImage.resolutions.push({
+          name:"Original resolution (" + $rootScope.Singleton.Preparations.newImage.originalWidth + "x"
+          + $rootScope.Singleton.Preparations.newImage.originalHeight + ")",
+          width:$rootScope.Singleton.Preparations.newImage.originalWidth,
+          height:$rootScope.Singleton.Preparations.newImage.originalHeight,
+          price:0
+        });
+      }
       console.log("badumpts");
       $location.path("/place_item_on_auction_step_two");
     }
@@ -953,8 +1001,62 @@ webRestApp.controller('PlaceItemOnAuctionController',['$scope','$http','$rootSco
 }]);
 
 webRestApp.controller('PlaceItemOnAuctionStepTwoController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.resPriceRanges=[];
+  $scope.cbStatus=false;
+
+  $scope.inquiryCheckboxStatus = function(){
+    $scope.buggy = 0;
+    for(var i=0;i<$scope.resPriceRanges.length;i++){
+      console.log("Checking checkbox: " + i);
+      if($scope.resPriceRanges[i].isChecked==true){
+        $scope.buggy++;
+        console.log("Checkbox:" + i + "is true");
+        break;
+      }
+    }
+    if($scope.buggy>0){
+      $scope.cbStatus=true;
+    }else{
+      $scope.cbStatus=false;
+    }
+  }
+
+$scope.sendForApproval = function(){
+  for(var i=0;i<$rootScope.Singleton.Preparations.newImage.resolutions.length;i++){
+    console.log("Photograph " + i + " : " + $rootScope.Singleton.Preparations.newImage.resolutions[i].name + ", "
+    + $rootScope.Singleton.Preparations.newImage.resolutions[i].width + ", "
+    + $rootScope.Singleton.Preparations.newImage.resolutions[i].height + ", "
+    + $rootScope.Singleton.Preparations.newImage.resolutions[i].price + ", "
+    + $scope.resPriceRanges[i].isChecked);
+  }
+}
 
 
+
+
+
+  $scope.init = function(){
+    $scope.length=$rootScope.Singleton.Preparations.newImage.resolutions.length;
+    for(var i=0;i<$scope.length;i++){
+      if(i==0){
+        $scope.resPriceRanges.push({
+          name:$rootScope.Singleton.Preparations.newImage.resolutions[i].name,
+          min:10,
+          max:50,
+          isChecked:false
+        });
+      }else{
+        $scope.resPriceRanges.push({
+          name:$rootScope.Singleton.Preparations.newImage.resolutions[i].name,
+          min:$scope.resPriceRanges[i-1].max,
+          max:$scope.resPriceRanges[i-1].max*2,
+          isChecked:false
+        });
+      }
+    };
+  }
+
+  $scope.init();
 }]);
 
 webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){

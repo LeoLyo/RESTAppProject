@@ -4,15 +4,17 @@ public class Resolution {
 	private String name;
 	private String height;
 	private String width;
+	private String price;
 	
 	
 	
 	
-	public Resolution(String name, String height, String width) {
+	public Resolution(String name, String height, String width, String price) {
 		super();
 		this.name = name;
 		this.height = height;
 		this.width = width;
+		this.price = price;
 	}
 
 
@@ -22,6 +24,17 @@ public class Resolution {
 	}
 	
 	
+	
+	public String getPrice() {
+		return price;
+	}
+
+
+	public void setPrice(String price) {
+		this.price = price;
+	}
+
+
 	public String getName() {
 		return name;
 	}
