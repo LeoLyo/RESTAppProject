@@ -252,8 +252,14 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
     return $http.post(urlBase+'/add-card', acUser);
   };
 
-  service.getAllUsers = function(){
-    return $http.get(urlBase+'/users');
+  service.getAllUsersb = function(){
+    return $http.get(urlBase+'/usersb');
+  };
+  service.getAllUserso = function(){
+    return $http.get(urlBase+'/userso');
+  };
+  service.getAllUsersa = function(){
+    return $http.get(urlBase+'/usersa');
   };
   service.getAllOUsers = function(){
     return $http.get(urlBase+'/ousers');
@@ -427,8 +433,14 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
 
 
 webRestApp.controller('LoginController',['$scope','$http','$rootScope','$location', 'userConfig',function($scope, $http, $rootScope, $location, userConfig){
-
+  $scope.sadLogin="";
   $scope.loginUser=function(){
+    $scope.allUsersb="";
+    $scope.allUserso="";
+    $scope.allUsersa="";
+    $scope.uCountb=0;
+    $scope.uCounto=0;
+    $scope.uCounta=0;
     $scope.logintrialuser={
       username: $scope.probableuser.username,
       password: $scope.probableuser.password
@@ -436,34 +448,88 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$locatio
     $scope.probableuser.username="";
     $scope.probableuser.password="";
 
-    var formatedUser=angular.toJson($scope.logintrialuser);
-    console.log(formatedUser);
-
-    userConfig.login(formatedUser).then(function(formatedUser,status){
-      userConfig.getCurrentUser().then(function(response){
-        userConfig.overrideCurrentUser(response.data);
-        console.log('LOGGED IN USER RAW: '+angular.toJson(response.data));
-        console.log('LOGGED IN USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
-        if($rootScope.Singleton.YouUser.uType==2 && $rootScope.Singleton.YouUser.firstTime==true){
-          $location.path('/change_password');
-          console.log('REDIRECT TO CHANGE PASSWORD SUCCEEDED!');
-        } else if($rootScope.Singleton.YouUser.uType==0 && $rootScope.Singleton.YouUser.activated==false){
-          $location.path('/waiting_for_validation');
-          console.log('REDIRECT TO WAITING SUCCEEDED!');
+    userConfig.getAllUsersb().then(function(responseb){
+      $scope.allUsersb=responseb.data;
+      console.log("All users inside size B: " + $scope.allUsersb.length);
+      for(var i=0;i<$scope.allUsersb.length;i++){
+        console.log("Logintrial: " + $scope.logintrialuser.username + ", allUsersb: " + $scope.allUsersb[i].username);
+        if($scope.logintrialuser.username==$scope.allUsersb[i].username){
+          $scope.uCountb++;
+          break;
         }
-        else if(($rootScope.Singleton.YouUser.uType==0 || $rootScope.Singleton.YouUser.uType==1) && $rootScope.Singleton.YouUser.blocked==true){
-          $location.path('/blocked');
-          console.log('REDIRECT TO BLOCKED SUCCEDED!');
-        }
-        else{
-          $location.path('/home');
-        console.log('REDIRECT TO LOGIN SUCCEDED!');
-        }
-      });
-
-
+      }
+      console.log("BEET: " + $scope.uCountb);
+      if($scope.uCountb==0){
+        userConfig.getAllUserso().then(function(responseo){
+          $scope.allUserso=responseo.data;
+          console.log("All users inside size O: " + $scope.allUserso.length);
+          for(var i=0;i<$scope.allUserso.length;i++){
+            console.log("Logintrial: " + $scope.logintrialuser.username + ", allUserso: " + $scope.allUserso[i].username);
+            if($scope.logintrialuser.username==$scope.allUserso[i].username){
+              $scope.uCounto++;
+              break;
+            }
+          }
+          console.log("OEET: " + $scope.uCounto);
+          if($scope.uCounto==0){
+            userConfig.getAllUsersa().then(function(responsea){
+              $scope.allUsersa=responsea.data;
+              console.log("KAY: " + responsea.data + ", " + responsea.data.length);
+              console.log("All users inside size A: " + $scope.allUsersa.length);
+              for(var i=0;i<$scope.allUsersa.length;i++){
+                console.log("Logintrial: " + $scope.logintrialuser.username + ", allUsersa: " + $scope.allUsersa[i].username);
+                if($scope.logintrialuser.username==$scope.allUsersa[i].username){
+                  $scope.uCounta++;
+                  break;
+                }
+              }
+              console.log("AEET: " + $scope.uCounta);
+              if($scope.uCounta==0){
+                $scope.sadLogin="The username you have entered does not belong to any existing account. Please try another one.";
+              }else{
+                $scope.lf();
+              }
+            });
+          }else{
+            $scope.lf();
+          }
+        });
+      }else{
+        $scope.lf();
+      }
     });
    };
+
+   $scope.lf = function(){
+       $scope.sadLogin="";
+       var formatedUser=angular.toJson($scope.logintrialuser);
+       console.log(formatedUser);
+
+       userConfig.login(formatedUser).then(function(formatedUser,status){
+         userConfig.getCurrentUser().then(function(response){
+           userConfig.overrideCurrentUser(response.data);
+           console.log('LOGGED IN USER RAW: '+angular.toJson(response.data));
+           console.log('LOGGED IN USER: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
+           if($rootScope.Singleton.YouUser.uType==2 && $rootScope.Singleton.YouUser.firstTime==true){
+             $location.path('/change_password');
+             console.log('REDIRECT TO CHANGE PASSWORD SUCCEEDED!');
+           } else if($rootScope.Singleton.YouUser.uType==0 && $rootScope.Singleton.YouUser.activated==false){
+             $location.path('/waiting_for_validation');
+             console.log('REDIRECT TO WAITING SUCCEEDED!');
+           }
+           else if(($rootScope.Singleton.YouUser.uType==0 || $rootScope.Singleton.YouUser.uType==1) && $rootScope.Singleton.YouUser.blocked==true){
+             $location.path('/blocked');
+             console.log('REDIRECT TO BLOCKED SUCCEDED!');
+           }
+           else{
+             $location.path('/home');
+           console.log('REDIRECT TO LOGIN SUCCEDED!');
+           }
+         });
+
+
+       });
+   }
 
    $scope.init = function(){
      if($rootScope.Singleton.YouUser.activated==false){
@@ -945,9 +1011,17 @@ webRestApp.controller('WaitingToEvolveController', ['$scope','$http','$rootScope
   }
 }]);
 
-webRestApp.controller('MerchantCornerController',['$scope','$location', function($scope, $location){
+webRestApp.controller('MerchantCornerController',['$scope','$location', '$rootScope', function($scope, $location, $rootScope){
+  $scope.sadRedirect="";
   $scope.placeItemOnAuction = function(){
-    $location.path('/place_item_on_auction');
+    if($rootScope.Singleton.YouUser.dimage==3){
+      $scope.sadRedirect="Alas, you have maxed out the number of times you can auction a new photograph today. Please come back tomorrow.";
+    }else if($rootScope.Singleton.YouUser.wimage==8){
+      $scope.sadRedirect="Alas, you have maxed out the number of times you can auction a new photograph this week. Please come back when a week has passed from ." + $rootScope.Singleton.YouUser.wTimer;
+    }
+    else{
+      $location.path('/place_item_on_auction');
+  }
   }
   $scope.yourAuctionPage = function(){
     $location.path('/your_auction_page');
@@ -1062,7 +1136,7 @@ $scope.sendForApproval = function(){
     $scope.tempPicUser.photos.push($rootScope.Singleton.Preparations.newImage);
 
     var formatedUser = angular.toJson($scope.tempPicUser);
-    if($rootScope.Singleton.YouUser.dimage==0 && $rootScope.Singleton.YouUser.wimage==0){
+    if($rootScope.Singleton.YouUser.dimage!=3 && $rootScope.Singleton.YouUser.wimage!=8){
       userConfig.globalTimer(formatedUser).then(function(response, status){
         console.log("Global set, d and w incremented");
         userConfig.getCurrentUser().then(function(response){
@@ -1072,7 +1146,7 @@ $scope.sendForApproval = function(){
           console.log("Photograph auctioned redirected successfully.");
         });
       });
-    }else if($rootScope.Singleton.YouUser.dimage==0){
+    }else if($rootScope.Singleton.YouUser.dimage!=3){
       userConfig.dayTimer(formatedUser).then(function(response, status){
         console.log("Day set, d and w incremented");
         userConfig.getCurrentUser().then(function(response){
@@ -1083,7 +1157,7 @@ $scope.sendForApproval = function(){
 
         });
       });
-    }else if($rootScope.Singleton.YouUser.wimage==0){
+    }else if($rootScope.Singleton.YouUser.wimage!=8){
       userConfig.weekTimer(formatedUser).then(function(response, status){
         console.log("Week set, d and w incremented");
         userConfig.getCurrentUser().then(function(response){
@@ -1128,8 +1202,28 @@ $scope.sendForApproval = function(){
 }]);
 
 webRestApp.controller('PhotographAuctionedController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
-	$scope.auctionAnotherMerch = function(){
-    $location.path('/place_item_on_auction');
+  $scope.sadRedirect="";
+  $scope.newImage = {
+    name:"",
+    category:"",
+    description:"",
+    location:"",
+    originalWidth:"",
+    originalHeight:"",
+    price:"",
+    byteArray:"",
+    resolutions:[]
+  };
+  $rootScope.Singleton.Preparations.newImage=$scope.newImage;
+
+  $scope.auctionAnotherMerch = function(){
+    if($rootScope.Singleton.YouUser.dimage==3){
+      $scope.sadRedirect="Alas, you have maxed out the number of times you can auction a new photograph today. Please come back tomorrow.";
+    }else if($rootScope.Singleton.YouUser.wimage==8){
+      $scope.sadRedirect="Alas, you have maxed out the number of times you can auction a new photograph this week. Please come back when a week has passed from ." + $rootScope.Singleton.YouUser.wTimer;
+    }else{
+      $location.path('/place_item_on_auction');
+  }
   }
   $scope.viewPersonalAuction = function(){
     $location.path('/your_auction_page');
@@ -1148,7 +1242,7 @@ webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope'
     }
   }
   $scope.approvedWares = $scope.calculateApprovedWares();
-  $scope.imageMessage="Approved wares: " + $scope.approvedWares +", meanwhile wares awaiting for approval: " + $rootScope.Singleton.YouUser.photos.size - $scope.approvedWares;
+  $scope.imageMessage="Approved wares: " + $scope.approvedWares +", meanwhile wares awaiting for approval: " + ($rootScope.Singleton.YouUser.photos.size - $scope.approvedWares);
 }]);
 
 webRestApp.controller('InsertCreditCardController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){

@@ -5,12 +5,12 @@ import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.Basic;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -24,6 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import beans.Admin;
 import beans.BasicUser;
 import beans.Firm;
 import beans.Operator;
@@ -88,8 +89,45 @@ public class LoginService {
 				}
 			}		
 		}
-
+		
 		request.getSession().setAttribute("user", loggedUser);
+		if(loggedUser.getuType()==1) {
+			BasicUser target = (BasicUser) loggedUser;
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			if(target.getdTimer().isEmpty() && !target.getwTimer().isEmpty()) {
+				LocalDateTime weekTime = LocalDateTime.parse(target.getwTimer(), formatter);
+				long wNoOfDaysBetween = ChronoUnit.DAYS.between(weekTime, now);
+				if(wNoOfDaysBetween>=8) {
+					target.setWimage(0);
+					target.setwTimer("");
+				}
+			}else if(!target.getdTimer().isEmpty() && target.getwTimer().isEmpty()) {
+				LocalDateTime dayTime = LocalDateTime.parse(target.getdTimer(), formatter);
+				long dNoOfDaysBeetween = ChronoUnit.DAYS.between(dayTime, now);
+				if(dNoOfDaysBeetween>=3) {
+					target.setDimage(0);
+					target.setdTimer("");
+				}else {
+					target.setwTimer(target.getdTimer());
+				}
+			}
+			else if(!target.getdTimer().isEmpty() && !target.getwTimer().isEmpty()) {
+				LocalDateTime dayTime = LocalDateTime.parse(target.getdTimer(), formatter);
+				LocalDateTime weekTime = LocalDateTime.parse(target.getwTimer(), formatter);
+				long dNoOfDaysBeetween = ChronoUnit.DAYS.between(dayTime, now);
+				long wNoOfDaysBetween = ChronoUnit.DAYS.between(weekTime, now);
+				
+				if(dNoOfDaysBeetween>=3) {
+					target.setDimage(0);
+					target.setdTimer("");
+				}
+				if(wNoOfDaysBetween>=8) {
+					target.setWimage(0);
+					target.setwTimer("");
+				}
+			}
+		}
 		return Response.status(200).build();
 	}
 
@@ -653,9 +691,57 @@ public class LoginService {
 
 	}
 	
+	@GET
+	@Path("/usersb")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getUsersb(@Context HttpServletRequest request) {
+		Collection<BasicUser> allUsersb = ((BasicUserDAO) ctx.getAttribute("userDAO")).findAll();
+		if(allUsersb.isEmpty()) {
+			System.out.println("No users exist atm.");
+			return Response.status(400).build();
+		}
+		else {
+			return Response.ok(allUsersb).build();
+
+		}
 	
+	}
 	
+	@GET
+	@Path("/userso")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getUserso(@Context HttpServletRequest request) {
+		Collection<Operator> allUserso = ((OperatorDAO) ctx.getAttribute("operatorDAO")).findAll();
+		if(allUserso.isEmpty()) {
+			System.out.println("No users exist atm.");
+			return Response.status(400).build();
+		}
+		else {
+			return Response.ok(allUserso).build();
+
+		}
+	
+	}
+	
+	@GET
+	@Path("/usersa")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getUsersa(@Context HttpServletRequest request) {
+		
+		Collection<Admin> allUsersa = ((AdminDAO) ctx.getAttribute("adminDAO")).findAll();
+		if(allUsersa.isEmpty()) {
+			System.out.println("No users exist atm.");
+			return Response.status(400).build();
+		}
+		else {
+			System.out.println("CHECK: " + allUsersa.size());
+			return Response.ok(allUsersa).build();
+
+		}
+	
+	}
 	//Does not work for some reason
+	/*
 	@GET
 	@Path("/users")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -672,7 +758,7 @@ public class LoginService {
 			return null;
 		}
 
-	}
+	}*/
 
 	//ADD THIS TO RAK'S TURTLE COLLECTION
 	//ALL HAIL RAK
