@@ -10,7 +10,8 @@ public class BasicUser extends User {
 	private String country;
 	private Cart cart;
 	private boolean blocked;
-	private long timer;
+	private String wTimer;
+	private String dTimer;
 	private int dimage;
 	private int wimage;
 	
@@ -23,6 +24,10 @@ public class BasicUser extends User {
 	public BasicUser() {
 		super();
 		blocked=false;
+		dimage=0;
+		wimage=0;
+		wTimer="";
+		dTimer="";
 	}
 	
 	public BasicUser(String username, String password, String email, String country) {
@@ -30,11 +35,20 @@ public class BasicUser extends User {
 		this.email = email;
 		this.country = country;
 		blocked=false;
+		dimage=0;
+		wimage=0;
+		wTimer="";
+		dTimer="";
 	}
 
 	
 	
-	
+	public void incrementDimage() {
+		dimage++;
+	}
+	public void incrementWimage() {
+		wimage++;
+	}
 
 	public int getDimage() {
 		return dimage;
@@ -52,12 +66,20 @@ public class BasicUser extends User {
 		this.wimage = wimage;
 	}
 
-	public long getTimer() {
-		return timer;
+	public String getwTimer() {
+		return wTimer;
 	}
 
-	public void setTimer(long timer) {
-		this.timer = timer;
+	public void setwTimer(String wTimer) {
+		this.wTimer = wTimer;
+	}
+
+	public String getdTimer() {
+		return dTimer;
+	}
+
+	public void setdTimer(String dTimer) {
+		this.dTimer = dTimer;
 	}
 
 	public boolean isBlocked() {
@@ -149,5 +171,8 @@ public class BasicUser extends User {
 	public void addPictureToTest(Photo photo) {
 		test.add(photo);
 		
+	}
+	public void addPhotographToAuction(Photo photo) {
+		photos.add(photo);
 	}
 }

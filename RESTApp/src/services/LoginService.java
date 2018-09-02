@@ -3,11 +3,14 @@ package services;
 import java.io.File;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.Basic;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -483,6 +486,145 @@ public class LoginService {
 				return Response.status(200).build();
 
 			
+		}
+	}
+	
+	
+	/*
+	@PUT
+	@Path("/global-timer")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response globalTimer(Photo newPhotogragh, @Context HttpServletRequest request) {
+		//BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser current = (BasicUser) request.getSession().getAttribute("user");
+		
+		if(current==null) {
+			System.out.println("Error not logged in");
+			return Response.status(400).build();
+		}
+		else if(current.getuType() != 1) {
+			System.out.println("Not a merchant");
+			return Response.status(400).build();
+		}else {
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formatedDateTime = now.format(formatter);
+			current.addPhotographToAuction(newPhotogragh);
+			current.setdTimer(formatedDateTime);
+			current.setwTimer(formatedDateTime);
+			current.incrementDimage();
+			current.incrementWimage();
+			System.out.println("GNOW: " + formatedDateTime);
+			System.out.println("New image: " + current.getPhotos().size() + " | " + current.getPhotos().get(0).getName());
+			return Response.status(200).build();
+		}
+	}*/
+	
+	@PUT
+	@Path("/gt")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response globalTimer(BasicUser us, @Context HttpServletRequest request) {
+		//BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser current = (BasicUser) request.getSession().getAttribute("user");
+		
+		if(current==null) {
+			System.out.println("Error not logged in");
+			return Response.status(400).build();
+		}
+		else if(current.getuType() != 1) {
+			System.out.println("Not a merchant");
+			return Response.status(400).build();
+		}else {
+			
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formatedDateTime = now.format(formatter);
+			current.addPhotographToAuction(us.getPhotos().get(0));
+			current.setdTimer(formatedDateTime);
+			current.setwTimer(formatedDateTime);
+			current.incrementDimage();
+			current.incrementWimage();
+			System.out.println("GNOW: " + formatedDateTime);
+			System.out.println("New image: " + current.getPhotos().size() + " | " + current.getPhotos().get(0).getName());
+			return Response.status(200).build();
+		}
+	}
+	
+	@PUT
+	@Path("/dt")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response dayTimer(BasicUser us, @Context HttpServletRequest request) {
+		//BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser current = (BasicUser) request.getSession().getAttribute("user");
+		
+		if(current==null) {
+			System.out.println("Error not logged in");
+			return Response.status(400).build();
+		}
+		else if(current.getuType() != 1) {
+			System.out.println("Not a merchant");
+			return Response.status(400).build();
+		}else if(current.getDimage()==0){
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formatedDateTime = now.format(formatter);
+			current.addPhotographToAuction(us.getPhotos().get(0));
+			current.setdTimer(formatedDateTime);
+			current.incrementDimage();
+			System.out.println("DNOW WAS 0: " + formatedDateTime);
+			System.out.println("New image: " + current.getPhotos().size() + " | " + current.getPhotos().get(0).getName());
+			System.out.println("Dimage status: " + current.getDimage() + ", dTimer status: " + current.getdTimer());
+			System.out.println("Wimage status: " + current.getWimage() + ", wTimer status: " + current.getwTimer());
+			return Response.status(200).build();
+		}else {
+			current.addPhotographToAuction(us.getPhotos().get(0));
+			current.incrementDimage();
+			System.out.println("New image: " + current.getPhotos().size() + " | " + current.getPhotos().get(0).getName());
+			System.out.println("Dimage status: " + current.getDimage() + ", dTimer status: " + current.getdTimer());
+			System.out.println("Wimage status: " + current.getWimage() + ", wTimer status: " + current.getwTimer());
+			return Response.status(200).build();
+		}
+	}
+	
+	@PUT
+	@Path("/wt")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response weekTimer(BasicUser us, @Context HttpServletRequest request) {
+		//BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser current = (BasicUser) request.getSession().getAttribute("user");
+		
+		if(current==null) {
+			System.out.println("Error not logged in");
+			return Response.status(400).build();
+		}
+		else if(current.getuType() != 1) {
+			System.out.println("Not a merchant");
+			return Response.status(400).build();
+		}else if(current.getWimage()==0){
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formatedDateTime = now.format(formatter);
+			current.addPhotographToAuction(us.getPhotos().get(0));
+			current.setwTimer(formatedDateTime);
+			current.incrementDimage();
+			current.incrementWimage();
+			System.out.println("WNOW WAS 0: " + formatedDateTime);
+			System.out.println("New image: " + current.getPhotos().size() + " | " + current.getPhotos().get(0).getName());
+			System.out.println("Dimage status: " + current.getDimage() + ", dTimer status: " + current.getdTimer());
+			System.out.println("Wimage status: " + current.getWimage() + ", wTimer status: " + current.getwTimer());
+			return Response.status(200).build();
+		}else {
+			current.addPhotographToAuction(us.getPhotos().get(0));
+			current.incrementDimage();
+			current.incrementWimage();
+			System.out.println("New image: " + current.getPhotos().size() + " | " + current.getPhotos().get(0).getName());
+			System.out.println("Wimage status: " + current.getWimage() + ", wTimer status: " + current.getwTimer());
+			System.out.println("Dimage status: " + current.getDimage() + ", dTimer status: " + current.getdTimer());
+			return Response.status(200).build();
 		}
 	}
 	

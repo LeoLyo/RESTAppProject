@@ -15,34 +15,37 @@ public class Photo {
 	private String owner;
 	private String category;
 	private String description;
+	private String location;
 	private int grade;
 	private int purchases = 0;
 	private boolean approved = false;
 	
 	private HashMap<String, Integer> grades = new HashMap<String,Integer>();
 	private ArrayList<Comment> comments = new ArrayList<Comment>();
+	private ArrayList<Resolution> resolutions = new ArrayList<Resolution>();
 	
 	public Photo() {
 		super();
 	}
 	
-	
-	
-	
+	public ArrayList<Resolution> getResolutions() {
+		return resolutions;
+	}
+	public void setResolutions(ArrayList<Resolution> resolutions) {
+		this.resolutions = resolutions;
+	}
+	public String getLocation() {
+		return location;
+	}
+	public void setLocation(String location) {
+		this.location = location;
+	}
 	public boolean isApproved() {
 		return approved;
 	}
-
-
-
-
 	public void setApproved(boolean approved) {
 		this.approved = approved;
 	}
-
-
-
-
 	public String getId() {
 		return id;
 	}

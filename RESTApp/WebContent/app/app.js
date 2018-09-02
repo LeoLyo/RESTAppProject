@@ -175,6 +175,10 @@ webRestApp.config(['$routeProvider',function($routeProvider){
     templateUrl: 'views/place_item_on_auction_step_two.html',
     controller: 'PlaceItemOnAuctionStepTwoController'
   })
+  .when('/photograph_auctioned',{
+    templateUrl: 'views/photograph_auctioned.html',
+    controller: 'PhotographAuctionedController'
+  })
   .otherwise({
     redirectTo:'/home'
   });
@@ -259,6 +263,15 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   };
   service.unblockUser = function(uUser){
     return $http.put(urlBase+'/unblock',uUser);
+  };
+  service.globalTimer = function(gtUser){
+    return $http.put(urlBase+'/gt', gtUser);
+};
+  service.dayTimer = function(dtUser){
+    return $http.put(urlBase+'/dt', dtUser);
+  };
+  service.weekTimer = function(wtUser){
+    return $http.put(urlBase+'/wt', wtUser);
   };
     return service;
 }]);
@@ -793,7 +806,7 @@ webRestApp.controller('EvolveController',['$scope','$http','$rootScope','userCon
 
 
 
-webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$rootScope','userConfig','$routeParams', function($scope,$http,$rootscope,userConfig, $routeParams){
+webRestApp.controller('VerificationSuccessfulController',['$scope','$http','$rootScope','userConfig','$routeParams', function($scope,$http,$rootScope,userConfig, $routeParams){
   $scope.verifiedUser={
     username:$routeParams.userForVerification,
     password:"temp",
@@ -1003,6 +1016,7 @@ webRestApp.controller('PlaceItemOnAuctionController',['$scope','$http','$rootSco
 webRestApp.controller('PlaceItemOnAuctionStepTwoController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
   $scope.resPriceRanges=[];
   $scope.cbStatus=false;
+  $scope.uncheckedMessage="";
 
   $scope.inquiryCheckboxStatus = function(){
     $scope.buggy = 0;
@@ -1022,12 +1036,66 @@ webRestApp.controller('PlaceItemOnAuctionStepTwoController',['$scope','$http','$
   }
 
 $scope.sendForApproval = function(){
-  for(var i=0;i<$rootScope.Singleton.Preparations.newImage.resolutions.length;i++){
-    console.log("Photograph " + i + " : " + $rootScope.Singleton.Preparations.newImage.resolutions[i].name + ", "
-    + $rootScope.Singleton.Preparations.newImage.resolutions[i].width + ", "
-    + $rootScope.Singleton.Preparations.newImage.resolutions[i].height + ", "
-    + $rootScope.Singleton.Preparations.newImage.resolutions[i].price + ", "
-    + $scope.resPriceRanges[i].isChecked);
+  $scope.tuggy = 0;
+  for(var j=0;j<$scope.resPriceRanges.length;j++){
+    if($scope.resPriceRanges[j].isChecked==true){
+      $scope.tuggy++;
+      break;
+    }
+  }
+
+  if($scope.tuggy==0){
+    console.log("Please check at least one resolution.");
+    $scope.uncheckedMessage="Please check at least one resolution.";
+  }else{
+    for(var i=0;i<$rootScope.Singleton.Preparations.newImage.resolutions.length;i++){
+      console.log("Photograph " + i + " : " + $rootScope.Singleton.Preparations.newImage.resolutions[i].name + ", "
+      + $rootScope.Singleton.Preparations.newImage.resolutions[i].width + ", "
+      + $rootScope.Singleton.Preparations.newImage.resolutions[i].height + ", "
+      + $rootScope.Singleton.Preparations.newImage.resolutions[i].price + ", "
+      + $scope.resPriceRanges[i].isChecked);
+    }
+    $scope.tempPicUser={
+      username:$rootScope.Singleton.YouUser.username,
+      photos:[]
+    };
+    $scope.tempPicUser.photos.push($rootScope.Singleton.Preparations.newImage);
+
+    var formatedUser = angular.toJson($scope.tempPicUser);
+    if($rootScope.Singleton.YouUser.dimage==0 && $rootScope.Singleton.YouUser.wimage==0){
+      userConfig.globalTimer(formatedUser).then(function(response, status){
+        console.log("Global set, d and w incremented");
+        userConfig.getCurrentUser().then(function(response){
+          userConfig.overrideCurrentUser(response.data);
+          console.log("[G] Overwritten current user: " + $rootScope.Singleton.YouUser.photos.length);
+          $location.path('/photograph_auctioned');
+          console.log("Photograph auctioned redirected successfully.");
+        });
+      });
+    }else if($rootScope.Singleton.YouUser.dimage==0){
+      userConfig.dayTimer(formatedUser).then(function(response, status){
+        console.log("Day set, d and w incremented");
+        userConfig.getCurrentUser().then(function(response){
+          userConfig.overrideCurrentUser(response.data);
+          console.log("[D] Overwritten current user");
+          $location.path('/photograph_auctioned');
+          console.log("Photograph auctioned redirected successfully.");
+
+        });
+      });
+    }else if($rootScope.Singleton.YouUser.wimage==0){
+      userConfig.weekTimer(formatedUser).then(function(response, status){
+        console.log("Week set, d and w incremented");
+        userConfig.getCurrentUser().then(function(response){
+          userConfig.overrideCurrentUser(response.data);
+          console.log("[W] Overwritten current user");
+          $location.path('/photograph_auctioned');
+          console.log("Photograph auctioned redirected successfully.");
+
+        });
+      });
+    }
+
   }
 }
 
@@ -1057,6 +1125,15 @@ $scope.sendForApproval = function(){
   }
 
   $scope.init();
+}]);
+
+webRestApp.controller('PhotographAuctionedController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+	$scope.auctionAnotherMerch = function(){
+    $location.path('/place_item_on_auction');
+  }
+  $scope.viewPersonalAuction = function(){
+    $location.path('/your_auction_page');
+  }
 }]);
 
 webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
@@ -1144,7 +1221,7 @@ webRestApp.controller('BlockUsersController',['$scope','$http','$rootScope','use
       uType: user.uType
     };
     var formatedUser = angular.toJson($scope.tempUser);
-    userConfig.blockUser(formatedUser).then(function(respone,status){
+    userConfig.blockUser(formatedUser).then(function(response,status){
       user.blocked = true;
       console.log("[B] Current user block status: " + user.username + ", " + user.blocked);
     });
@@ -1156,7 +1233,7 @@ webRestApp.controller('BlockUsersController',['$scope','$http','$rootScope','use
       uType: user.uType
     };
     var formatedUser = angular.toJson($scope.tempUser);
-    userConfig.unblockUser(formatedUser).then(function(respone,status){
+    userConfig.unblockUser(formatedUser).then(function(response,status){
       user.blocked = false;
       console.log("[UB] Current user block status: " + user.username + ", " + user.blocked);
     });
