@@ -291,6 +291,9 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   service.weekTimer = function(wtUser){
     return $http.put(urlBase+'/wt', wtUser);
   };
+  service.approveWare = function(awUser){
+    return $http.put(urlBase+'/approve-ware',awUser);
+  }
     return service;
 }]);
 
@@ -986,6 +989,22 @@ webRestApp.controller('ApproveWaresController',['$scope','$http','$rootScope','u
     $rootScope.Singleton.Global.ogImageBA=ware;
     console.log("HECK YEAH CLOUD ME MORE: " + $rootScope.Singleton.Global.ogImageBA.name + ", " + $rootScope.Singleton.Global.ogImageBA.byteArray);
     $location.path(path);
+  }
+
+  $scope.approveThisWare = function(ware){
+    $scope.tempUser = {
+      username:$scope.merchantUser.username,
+      uType:"1",
+      photos:[{
+        name:ware.name
+      }]
+    }
+    console.log("User: " + $scope.tempUser.username + ", " + $scope.tempUser.photos[0].name);
+    var formatedUser = angular.toJson($scope.tempUser);
+    userConfig.approveWare(formatedUser).then(function(response,status){
+      ware.approved=true;
+      console.log("Ware " +  $scope.tempUser.photos[0].name + " has been approved.");
+    });
   }
 }]);
 

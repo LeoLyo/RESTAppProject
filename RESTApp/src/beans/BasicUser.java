@@ -175,4 +175,15 @@ public class BasicUser extends User {
 	public void addPhotographToAuction(Photo photo) {
 		photos.add(photo);
 	}
+
+	public void approvePhoto(String name) {
+		for(int i=0;i<photos.size();i++) {
+			if(photos.get(i).getName().equals(name)) {
+				photos.get(i).setApproved(true);
+				System.out.println("Photo " + name + "has been approved, Hurray! ^_^");
+				break;
+			}
+		}
+		
+	}
 }

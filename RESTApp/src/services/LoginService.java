@@ -377,6 +377,25 @@ public class LoginService {
 	}
 	
 	
+	@PUT
+	@Path("/approve-ware")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response approveWare(BasicUser us, @Context HttpServletRequest request) {
+		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
+		BasicUser target = dao.find(us.getUsername());
+		
+		if(target.getuType()!=1 || target==null) {
+			System.out.println("Classic standard output");
+			return Response.status(400).build();
+		}
+		else {
+			target.approvePhoto(us.getPhotos().get(0).getName());
+			return Response.status(200).build();
+		}
+		
+	}
+	
 	@POST
 	@Path("/add-card")
 	@Consumes(MediaType.APPLICATION_JSON)
