@@ -6,24 +6,24 @@ import java.util.UUID;
 
 public class Cart {
 	
-	private Map<UUID, Photo> photos = new HashMap<>();
+	private Map<String, Photo> photos = new HashMap<>();
 	private String dateID;
 	
 	public Cart() {
 		super();
 	}
 	
-	public Cart(Map<UUID, Photo> photos, String dateID) {
+	public Cart(Map<String, Photo> photos, String dateID) {
 		super();
 		this.photos = photos;
 		this.setDateID(dateID);
 	}
 
-	public Map<UUID, Photo> getPhotos() {
+	public Map<String, Photo> getPhotos() {
 		return photos;
 	}
 
-	public void setPhotos(Map<UUID, Photo> photos) {
+	public void setPhotos(Map<String, Photo> photos) {
 		this.photos = photos;
 	}
 

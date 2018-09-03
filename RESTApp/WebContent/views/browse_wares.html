@@ -1,0 +1,25 @@
+<div class="content">
+  <h1 style="margin-left: 12px;">Browsing all wares</h1>
+  <button ng-click="order = 'name'">Order by name</button>
+  <button ng-click="order = 'dateOfAuctioning'">Order by date of auctioning</button>
+  <button ng-click="order = 'grade'">Order by grade</button>
+  <button ng-click="order = 'lowestPrice'">Order by lowest Price</button>
+  <button ng-click="order = 'noOfSales'">Order by number of sales</button>
+  <hr>
+  <button style="background-color:Black; color:white;" ng-click="order = '-name'">Order by name</button>
+  <button style="background-color:Black; color:white;" ng-click="order = '-dateOfAuctioning'">Order by date of auctioning</button>
+  <button style="background-color:Black; color:white;" ng-click="order = '-grade'">Order by grade</button>
+  <button style="background-color:Black; color:white;" ng-click="order = '-lowestPrice'">Order by lowest Price</button>
+  <button style="background-color:Black; color:white;" ng-click="order = '-noOfSales'">Order by number of sales</button>
+  <input type="text" ng-model="search" placeholder="Search for desired ware"/>
+  <ul>
+    <li ng-repeat="ware in Singleton.Global.allWares | orderBy: order | filter: search" ng-show="ware.approved==true">
+      <img ng-src="{{ware.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
+      <h3>Name: {{ware.name}}</h3>
+      <h3>Author: {{ware.author}}</h3>
+      <h3>Category: {{ware.category}}</h3>
+      <button style="float:right; margin-left: 12px; background-color:CornflowerBlue; color:white;" ng-click="viewWareDetails(ware)">View Ware Details</button>
+      <button style="float:right; margin-left: 12px; background-color:YellowGreen; color:white;" ng-click="viewAuthorDetails(ware)">View Author Details</button>
+    </li>
+  </ul>
+</div>

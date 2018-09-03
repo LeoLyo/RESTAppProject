@@ -1,0 +1,14 @@
+<div class="content">
+  <h1>Details of ware: {{Singleton.Global.wareTransfer.name}}</h1>
+  <img ng-src="{{Singleton.Global.wareTransfer.byteArray}}" style="margin: 12px 12px 12px 12px; float: left; height: 200px; width:200px;"/>
+  <h3>Location: {{Singleton.Global.wareTransfer.location}}</h3>
+  <h3>Grade: {{Singleton.Global.wareTransfer.grade}}</h3>
+  <h3>Description: {{Singleton.Global.wareTransfer.description}}</h3>
+  <ul>
+    <li ng-repeat="rez in Singleton.Global.wareTransfer.resolutions | orderBy:price">
+      <h4>{{rez.name}} | {{rez.width}}x{{rez.height}} | {{rez.price}}</h4>
+      <button style="float:right; margin-left: 12px; background-color:ForestGreen; color:white;" ng-click="buyChosenResolution(rez)">Buy image in chosen resolution</button>
+      <button style="float:right; margin-left: 12px; background-color:ForestGreen; color:white;" ng-click="addToCart(rez)">Add to cart</button>
+    </li>
+  </ul>
+</div>

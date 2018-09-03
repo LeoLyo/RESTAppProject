@@ -8,17 +8,23 @@ public class Photo {
 	
 	private String id;
 	private String name;
-	private Double price;
 	private String originalWidth;
 	private String originalHeight;
+	private String newWidth;
+	private String newHeight;
 	private String byteArray;
-	private String owner;
+	private String author;
 	private String category;
 	private String description;
 	private String location;
+	private String price;
+	private String dateOfAuctioning;
+	private String lPrice;
+	private int noOfSales;
 	private int grade;
 	private int purchases = 0;
 	private boolean approved = false;
+	private boolean officialWare = false;
 	
 	private HashMap<String, Integer> grades = new HashMap<String,Integer>();
 	private ArrayList<Comment> comments = new ArrayList<Comment>();
@@ -27,7 +33,52 @@ public class Photo {
 	public Photo() {
 		super();
 	}
+
 	
+	
+	
+	public String getNewWidth() {
+		return newWidth;
+	}
+	public void setNewWidth(String newWidth) {
+		this.newWidth = newWidth;
+	}
+	public String getNewHeight() {
+		return newHeight;
+	}
+	public void setNewHeight(String newHeight) {
+		this.newHeight = newHeight;
+	}
+	public boolean isOfficialWare() {
+		return officialWare;
+	}
+	public void setOfficialWare(boolean officialWare) {
+		this.officialWare = officialWare;
+	}
+	public String getPrice() {
+		return price;
+	}
+	public void setPrice(String price) {
+		this.price = price;
+	}
+	public String getlPrice() {
+		return lPrice;
+	}
+	public void setlPrice(String lPrice) {
+		this.lPrice = lPrice;
+	}
+	public int getNoOfSales() {
+		return noOfSales;
+	}
+	public void setNoOfSales(int noOfSales) {
+		this.noOfSales = noOfSales;
+	}
+	public String getDateOfAuctioning() {
+		return dateOfAuctioning;
+	}
+	public void setDateOfAuctioning(String dateOfAuctioning) {
+		this.dateOfAuctioning = dateOfAuctioning;
+	}
 	public ArrayList<Resolution> getResolutions() {
 		return resolutions;
 	}
@@ -58,12 +109,7 @@ public class Photo {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Double getPrice() {
-		return price;
-	}
-	public void setPrice(Double price) {
-		this.price = price;
-	}
+
 	public String getOriginalWidth() {
 		return originalWidth;
 	}
@@ -76,11 +122,11 @@ public class Photo {
 	public void setOriginalHeight(String originalHeight) {
 		this.originalHeight = originalHeight;
 	}
-	public String getOwner() {
-		return owner;
+	public String getAuthor() {
+		return author;
 	}
-	public void setOwner(String owner) {
-		this.owner = owner;
+	public void setAuthor(String author) {
+		this.author = author;
 	}
 	public String getCategory() {
 		return category;

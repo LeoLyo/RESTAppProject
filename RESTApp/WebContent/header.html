@@ -6,7 +6,8 @@
       <li><a href="#!/operator_mode" ng-show="Singleton.YouUser.uType==2">Operator Mode</li>
       <li><a href="#!/evolve" ng-show="Singleton.YouUser.uType=='0'">Evolve</li>
       <li><a href="#!/add_operator"  ng-show="Singleton.YouUser.uType=='3'">Add operator</li>
-      <li><a href="#!/home">Home</li>
+      <li><a href="#!/home" ng-hide="Singleton.YouUser.uType==2">Home</li>
+      <li><a href="#!/operator_home" ng-show="Singleton.YouUser.uType==2">Operator Home</li>
       <li><a href="#!/login" ng-show="Singleton.YouUser.username==''">Login</li>
       <li><a href="#!/logout" ng-hide="Singleton.YouUser.username==''">Logout</li>
       <li><a href="#!/register" ng-show="Singleton.YouUser.username==''">Register</li>

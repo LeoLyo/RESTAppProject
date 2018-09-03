@@ -1,0 +1,15 @@
+<div class="content">
+  <h1>About Author {{authorUser.username}}</h1>
+  <h2>Info about author:</h2>
+  <h3>Country: {{authorUser.country}}</h3>
+  <h3>List of author's photographs:</h3>
+  <ul>
+    <li ng-repeat="ware in authorUser.photos | orderBy: name | filter: search" ng-show="ware.approved==true">
+      <img ng-src="{{ware.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
+      <h3>Name: {{ware.name}}</h3>
+      <h3>Author: {{ware.author}}</h3>
+      <h3>Category: {{ware.category}}</h3>
+      <button style="float:right; margin-left: 12px; background-color:CornflowerBlue; color:white;" ng-click="viewAuthorWareDetails(ware)">View Ware Details</button>
+    </li>
+  </ul>
+</div>

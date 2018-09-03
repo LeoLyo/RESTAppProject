@@ -1,16 +1,22 @@
 package services;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.PostConstruct;
+import javax.imageio.ImageIO;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -24,8 +30,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.sun.prism.Image;
+
 import beans.Admin;
 import beans.BasicUser;
+import beans.Cart;
 import beans.Firm;
 import beans.Operator;
 import beans.Photo;
@@ -407,7 +416,7 @@ public class LoginService {
 		if(target==null){
 			System.out.println("Something went wrong");
 			return Response.status(400).build();
-		}
+		}/*
 		else if(!(target.getuType() == 1) && !(target.getuType() == 3)) {
 			System.out.println("Not merchant nor admin.");
 			return Response.status(400).build();
@@ -415,7 +424,7 @@ public class LoginService {
 		else if(target.getuType() == 0) {
 			System.out.println("Peasants can't use the Merchant Corner.");
 			return Response.status(400).build();
-		}
+		}*/
 		
 		else {
 			target.addCard(us.getCards().get(0));
@@ -685,7 +694,65 @@ public class LoginService {
 		}
 	}
 	
-	
+	@PUT
+	@Path("/bw")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response buyWares(BasicUser us, @Context HttpServletRequest request) {
+		BasicUser current = (BasicUser) request.getSession().getAttribute("user");
+		
+		if(current==null) {
+			System.out.println("Error not logged in");
+			return Response.status(400).build();
+		}else {
+			Cart nCart = new Cart();
+			int cash=0;
+			for(int i=0;i<us.getPhotos().size();i++) {
+				String sPrice = us.getPhotos().get(i).getlPrice();
+				System.out.println("Cena: " + sPrice);
+				//int warePrice = Integer.parseInt(sPrice);
+				//cash+=warePrice;
+				nCart.getPhotos().put(us.getPhotos().get(i).getId(), us.getPhotos().get(i));
+				String wareName = us.getPhotos().get(i).getName();
+				String wareAuthor = us.getPhotos().get(i).getAuthor();
+				String wareDateOfAuctioning = us.getPhotos().get(i).getDateOfAuctioning();
+				String sOriginalWidth = us.getPhotos().get(i).getOriginalWidth();
+				String sOriginalHeigth = us.getPhotos().get(i).getOriginalHeight();
+				String sNewWidth = us.getPhotos().get(i).getNewWidth();
+				
+				int originalWidth = Integer.parseInt(sOriginalWidth);
+				int originalHeight = Integer.parseInt(sOriginalHeigth);
+				int newWidth = Integer.parseInt(sNewWidth);
+				int newHeight = originalHeight*newWidth/originalWidth;
+				
+				String biteArray = us.getPhotos().get(i).getByteArray();
+				byte[] imageByteArray = Base64.getDecoder().decode(biteArray);
+				ByteArrayInputStream bis = new ByteArrayInputStream(imageByteArray);
+			     try {
+					BufferedImage inputImage = ImageIO.read(bis);
+					BufferedImage outputImage = new BufferedImage(newWidth, newHeight, inputImage.getType());
+					Graphics2D g2d = outputImage.createGraphics();
+			        g2d.drawImage(inputImage, 0, 0, newWidth, newHeight, null);
+			        g2d.dispose();
+			        String newImageName=wareName+"by"+wareAuthor+"on"+wareDateOfAuctioning+".png";
+			        String path="C:\\Users\\Anagnosti\\Desktop\\Database\\wares\\"+newImageName;
+			        ImageIO.write(outputImage, "png", new File(path));
+			        System.out.println(newImageName + " has been bought, saved in the adequate storage unit.");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			LocalDateTime now = LocalDateTime.now();
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String formatedDateTime = now.format(formatter);
+			nCart.setDateID(formatedDateTime);
+			current.addToHistory(formatedDateTime, nCart);
+			//current.receiveIncome(cash);
+			//System.out.println("Current amount on user: " + current.getCards().get(0).getMoney());
+			return Response.status(200).build();
+		}
+	}
 	
 	
 	@GET
@@ -778,7 +845,6 @@ public class LoginService {
 		}
 
 	}*/
-
 	//ADD THIS TO RAK'S TURTLE COLLECTION
 	//ALL HAIL RAK
 	@PUT
@@ -790,6 +856,23 @@ public class LoginService {
 		Photo photo = dao.find(ph.getId(),ph.getByteArray());
 		
 		if (photo==null) {
+			return Response.status(400).build();
+		}
+		 else {
+			return Response.ok(photo).build();
+
+		}
+	}
+	
+	@PUT
+	@Path("/find-ware")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response findWare(Photo ph, @Context HttpServletRequest request) {
+		PhotoDAO dao = (PhotoDAO) ctx.getAttribute("photoDAO");
+		Photo photo = dao.find(ph.getId());
+		if (photo==null) {
+			System.out.println("No photo found for set id: " + ph.getId());
 			return Response.status(400).build();
 		}
 		 else {
@@ -828,6 +911,7 @@ public class LoginService {
 
 		}
 	}
+	
 
 
 	@GET

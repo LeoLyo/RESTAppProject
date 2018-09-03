@@ -1,5 +1,7 @@
 package beans;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +30,7 @@ public class BasicUser extends User {
 		wimage=0;
 		wTimer="";
 		dTimer="";
+		cart= new Cart();
 	}
 	
 	public BasicUser(String username, String password, String email, String country) {
@@ -39,6 +42,8 @@ public class BasicUser extends User {
 		wimage=0;
 		wTimer="";
 		dTimer="";
+		cart= new Cart();
+
 	}
 
 	
@@ -174,16 +179,28 @@ public class BasicUser extends User {
 	}
 	public void addPhotographToAuction(Photo photo) {
 		photos.add(photo);
+		photo.setAuthor(getUsername());
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		String formatedDateTime = now.format(formatter);
+		photo.setDateOfAuctioning(formatedDateTime);
+		String uid = photo.getName()+"Q"+photo.getAuthor()+"Q"+formatedDateTime;
+		photo.setId(uid);
 	}
 
 	public void approvePhoto(String name) {
 		for(int i=0;i<photos.size();i++) {
 			if(photos.get(i).getName().equals(name)) {
 				photos.get(i).setApproved(true);
-				System.out.println("Photo " + name + "has been approved, Hurray! ^_^");
+				photos.get(i).setlPrice(photos.get(i).getResolutions().get(0).getPrice());
+				//System.out.println("Lowest price of res: " + photos.get(i).getResolutions().get(0).getPrice());
+				System.out.println("Photo " + name + " has been approved, Hurray! ^_^");
 				break;
 			}
 		}
 		
+	}
+	public void receiveIncome(int transaction) {
+		cards.get(0).addMoney(transaction);
 	}
 }

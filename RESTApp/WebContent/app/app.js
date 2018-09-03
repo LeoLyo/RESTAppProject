@@ -65,7 +65,11 @@ webRestApp.run(function($rootScope){
     },
     Global:{
       peasantsAndMerchants:[],
-      ogImageBA:""
+      ogImageBA:"",
+      allWares:[],
+      wareTransfer:"",
+      shopCardTransfer:"",
+      shopTranserBoolean:false
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -191,6 +195,21 @@ webRestApp.config(['$routeProvider',function($routeProvider){
     templateUrl:'views/ware_og_size.html',
     controller: 'WareOGSizeController'
   })
+  .when('/browse_wares',{
+    templateUrl:'views/browse_wares.html',
+    controller:'browseWaresController'
+  })
+  .when('/ware_details/:ware_with_details',{
+    templateUrl:'views/ware_details.html',
+    controller: 'WareDetailsController'
+  })
+  .when('/operator_home',{
+    templateUrl:'views/operator_home.html'
+  })
+  .when('/about_author/:author_name',{
+    templateUrl:'views/about_author.html',
+    controller: 'AboutAuthorController'
+  })
   .otherwise({
     redirectTo:'/home'
   });
@@ -293,7 +312,13 @@ webRestApp.factory('userConfig',['$http','$rootScope', function($http, $rootScop
   };
   service.approveWare = function(awUser){
     return $http.put(urlBase+'/approve-ware',awUser);
-  }
+  };
+  service.findWare = function(fwPhotograph){
+    return $http.put(urlBase+'/find-ware',fwPhotograph);
+  };
+  service.buyWares = function(bwUser){
+    return $http.put(urlBase+'/bw', bwUser);
+};
     return service;
 }]);
 
@@ -429,6 +454,11 @@ webRestApp.controller('HomeController',['$scope','$http','$rootScope','userConfi
     console.log("TESTING METHOD: " + $rootScope.Singleton.YouUser.isBlocked + ", " + $rootScope.Singleton.Preparations.newImage.byteArray);
   };
 
+  $scope.browseWares = function(){
+    var path = '/browse_wares';
+    $location.path(path);
+    console.log("Browsing wares successfully!");
+  }
 
 
   $scope.refreshHomeMessage = function(){
@@ -528,6 +558,9 @@ webRestApp.controller('LoginController',['$scope','$http','$rootScope','$locatio
            if($rootScope.Singleton.YouUser.uType==2 && $rootScope.Singleton.YouUser.firstTime==true){
              $location.path('/change_password');
              console.log('REDIRECT TO CHANGE PASSWORD SUCCEEDED!');
+           }else if($rootScope.Singleton.YouUser.uType==2){
+             $location.path('/operator_home');
+             console.log('REDIRECT TO OPERATOR HOME SUCCEEDED!');
            } else if($rootScope.Singleton.YouUser.uType==0 && $rootScope.Singleton.YouUser.activated==false){
              $location.path('/waiting_for_validation');
              console.log('REDIRECT TO WAITING SUCCEEDED!');
@@ -1004,6 +1037,25 @@ webRestApp.controller('ApproveWaresController',['$scope','$http','$rootScope','u
     userConfig.approveWare(formatedUser).then(function(response,status){
       ware.approved=true;
       console.log("Ware " +  $scope.tempUser.photos[0].name + " has been approved.");
+      userConfig.getAllUsersb().then(function(response){
+        $rootScope.Singleton.Global.peasantsAndMerchants=response.data;
+      });
+      $rootScope.Singleton.Global.allWares.push(ware);
+      /*console.log("All wares have been reset due to a change in ware storage: "+$rootScope.Singleton.Global.allWares.length);
+      for(var i=0;i<$rootScope.Singleton.Global.peasantsAndMerchants.length;i++){
+        if($rootScope.Singleton.Global.peasantsAndMerchants[i].uType==1 && $rootScope.Singleton.Global.peasantsAndMerchants[i].photos.length>0){
+          console.log("Merchant: " + $rootScope.Singleton.Global.peasantsAndMerchants[i].username + " has as many photos as: " + $rootScope.Singleton.Global.peasantsAndMerchants[i].photos.length + " to push.");
+          for(var j=0;j<$rootScope.Singleton.Global.peasantsAndMerchants[i].photos.length;j++){
+            if($rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j].officialWare==false){
+              $scope.varWare = $rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j];
+              console.log("|||" + $scope.varWare.name +"||"+ $scope.varWare.officialWare + "|"+$scope.varWare.activated);
+              $scope.varWare.officialWare=true;
+              $rootScope.Singleton.Global.allWares.push($scope.varWare);
+            }
+          }
+        }
+      }*/
+      //$rootScope.Singleton.Global.allWaresChanged=true;
     });
   }
 }]);
@@ -1351,10 +1403,19 @@ webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope'
     }else{
       $scope.notApprovedWares--;
     }
+    //>>>???
     var indexRemovedImage = $rootScope.Singleton.YouUser.photos.indexOf(image);
+    for(var i=0;i<$rootScope.Singleton.Global.allWares;i++){
+      if(image.name==$rootScope.Singleton.Global.allWares[i].name){
+        console.log("found index: " + i);
+        console.log("Image in question: " + image.name);
+        console.log("Image in array in question: " + $rootScope.Singleton.Global.allWares[i].name);
+
+        $rootscope.Singleton.Global.allWares.splice(i,1);
+        break;
+      }
+    }
     $rootScope.Singleton.YouUser.photos.splice(indexRemovedImage,1);
-
-
 
     }
 
@@ -1383,7 +1444,13 @@ webRestApp.controller('InsertCreditCardController',['$scope','$http','$rootScope
       userConfig.overrideCurrentUser(response.data);
       var formatedCards = angular.toJson($rootScope.Singleton.YouUser.cards);
       console.log("Deck check: " + formatedCards);
-      if($rootScope.Singleton.YouUser.cards.length==1){
+      if($rootScope.Singleton.Global.shopTranserBoolean==true){
+        $rootScope.Singleton.Global.shopTranserBoolean=false;
+        var path = $rootScope.Singleton.Global.shopCardTransfer;
+        $location.path(path);
+
+      }
+      else if($rootScope.Singleton.YouUser.cards.length==1){
         $location.path('/place_item_on_auction');
       }else{
         $location.path('/merchant_corner');
@@ -1455,6 +1522,137 @@ webRestApp.controller('BlockUsersController',['$scope','$http','$rootScope','use
 $scope.init();
 
 }]);
+
+webRestApp.controller('browseWaresController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+
+/*
+  if($rootScope.Singleton.Global.allWaresChanged==true){
+    userConfig.getAllUsersb().then(function(response){
+      $rootScope.Singleton.Global.peasantsAndMerchants=response.data;
+    });
+    $rootScope.Singleton.Global.allWares=[];
+    console.log("All wares have been reset due to a change in ware storage: "+$rootScope.Singleton.Global.allWares.length);
+    for(var i=0;i<$rootScope.Singleton.Global.peasantsAndMerchants.length;i++){
+      if($rootScope.Singleton.Global.peasantsAndMerchants[i].uType==1 && $rootScope.Singleton.Global.peasantsAndMerchants[i].photos.length>0){
+        console.log("Merchant: " + $rootScope.Singleton.Global.peasantsAndMerchants[i].username + " has as many photos as: " + $rootScope.Singleton.Global.peasantsAndMerchants[i].photos.length + " to push.");
+        for(var j=0;j<$rootScope.Singleton.Global.peasantsAndMerchants[i].photos.length;j++){
+          if($rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j].officialWare==false){
+            $rootScope.Singleton.Global.allWares.push($rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j]);
+            $rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j].officialWare=false;
+            console.log("Added ware: " + $rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j].name + ", " + $rootScope.Singleton.Global.peasantsAndMerchants[i].photos[j].officialWare)
+          }
+        }
+      }
+    }
+    $rootScope.Singleton.Global.allWaresChanged=false;
+  }*/
+  $scope.something = function(){
+    var formatedWares = angular.toJson($rootScope.Singleton.Global.allWares);
+    console.log("AYA: " + formatedWares);
+    console.log("FFF length: " + $rootScope.Singleton.Global.allWares.length + ", name and officiality: " + $rootScope.Singleton.Global.allWares[0].name + ", " + $rootScope.Singleton.Global.allWares[0].officialWare);
+  }
+  $scope.viewWareDetails = function(ware){
+    console.log("ID: " + ware.id + ", date of auctioning: " + ware.dateOfAuctioning);
+    var concatstring= ware.name+"Q"+ware.author+"Q"+ware.dateOfAuctioning;
+    var path = '/ware_details/'+concatstring;
+    $rootScope.Singleton.Global.wareTransfer=ware;
+    $location.path(path);
+    console.log("Viewing specific ware: " + concatstring);
+  }
+  $scope.viewAuthorDetails = function(ware){
+    $scope.wareAuthor = ware.author;
+    var path = '/about_author/'+$scope.wareAuthor;
+    $location.path(path);
+    console.log("Viewing specific author path: " + path);
+  }
+
+}]);
+
+webRestApp.controller('WareDetailsController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+
+
+  console.log("REZ LENGTH WARE DETAILS: " + $rootScope.Singleton.Global.wareTransfer.resolutions.length);
+  /*$scope.passedPhotograph = {
+    id: $routeParams.ware_with_details
+  };
+  $scope.wareDetailedImage = "";
+  var formatedPhotograph = angular.toJson($scope.passedPhotograph);
+  userConfig.findWare(formatedPhotograph).then(function(response,status){
+    $scope.wareDetailedImage = response.data;
+
+  });*/
+
+
+  $scope.buyChosenResolution = function(rez){
+    if($rootScope.Singleton.YouUser.cards === undefined || $rootScope.Singleton.YouUser.cards == 0){
+      var path = '/ware_details/'+$routeParams.ware_with_details;
+      $rootScope.Singleton.Global.shopTranserBoolean=true;
+      $rootScope.Singleton.Global.shopCardTransfer=path;
+      $location.path('/insert_credit_card');
+    }else{
+      $scope.buyer = {
+        username:"random",
+        password:"ranodm",
+        photos:[]
+      };
+      $scope.image = {
+        name: $rootScope.Singleton.Global.wareTransfer.name,
+        byteArray: $rootScope.Singleton.Global.wareTransfer.byteArray,
+        originalWidth: $rootScope.Singleton.Global.wareTransfer.originalWidth,
+        originalHeight: $rootScope.Singleton.Global.wareTransfer.originalHeight,
+        newWidth: rez.width,
+      }
+      $scope.buyer.photos.push($scope.image);
+      var formatedUser = angular.toJson($scope.buyer);
+      userConfig.buyWares(formatedUser).then(function(response, status){
+        console.log("Picture bought");
+        userConfig.getCurrentUser().then(function(response){
+          userConfig.overrideCurrentUser(response.data);
+          console.log("YouUser updated after selling a card.");
+        });
+
+      });
+    }
+  }
+
+  $scope.addToCart = function(rez){
+    if($rootScope.Singleton.YouUser.cards === undefined || $rootScope.Singleton.YouUser.cards == 0){
+      var path = '/ware_details/'+$routeParams.ware_with_details;
+      $rootScope.Singleton.Global.shopTranserBoolean=true;
+      $rootScope.Singleton.Global.shopCardTransfer=path;
+      $location.path('/insert_credit_card');
+    }else{
+
+    }
+  }
+}]);
+
+webRestApp.controller('AboutAuthorController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.tempAuthor = {
+    username:  $routeParams.author_name,
+    password: "temp",
+    uType: "1"
+  };
+  console.log("Author: " + $scope.tempAuthor.username);
+  $scope.authorUser="";
+  var formatedUser = angular.toJson($scope.tempAuthor);
+  userConfig.findUser(formatedUser).then(function(response, status){
+    $scope.authorUser = response.data;
+    console.log("Foud author: " + $scope.authorUser.username + " | " + $scope.authorUser.photos.length);
+  });
+
+  $scope.viewAuthorWareDetails = function(ware){
+    console.log("ID: " + ware.id + ", date of auctioning: " + ware.dateOfAuctioning);
+    var concatstring= ware.name+"Q"+ware.author+"Q"+ware.dateOfAuctioning;
+    var path = '/ware_details/'+concatstring;
+    $rootScope.Singleton.Global.wareTransfer=ware;
+    $location.path(path);
+    console.log("Viewing specific ware: " + concatstring);
+  }
+
+}]);
+
+
 
 webRestApp.controller('TemplateController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
 	$scope.template=1;

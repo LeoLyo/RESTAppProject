@@ -38,6 +38,16 @@ public class PhotoDAO {
 		}
 		return photo;
 	}
+	public Photo find(String id) {
+		if (!photos.containsKey(id)) {
+			return null;
+		}
+		Photo photo = photos.get(id);
+		if (photo==null) {
+			return null;
+		}
+		return photo;
+	}
 	
 	public boolean remove(String id) {
 		if(photos.containsKey(id)) {
