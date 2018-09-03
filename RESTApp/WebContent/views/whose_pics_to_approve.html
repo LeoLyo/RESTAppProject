@@ -1,0 +1,9 @@
+<div class="content">
+  <ul>
+    <li ng-repeat="merchant in Singleton.Global.peasantsAndMerchants | orderBy:merchant.name" ng-show="merchant.uType==1 && merchant.photos.length>0 && photosToApprove(merchant)>0">
+      <h3 style="margin-left: 12px">{{merchant.username}}</h3>
+      <h3 style="margin-left: 12px">Photos to approve: {{photosToApprove(merchant)}}</h3>
+      <button style="float:right; margin-left: 12px; background-color:CornflowerBlue; color:white;" ng-click="seeWaresOfMerchant(merchant)">See Merchant's wares</button>
+    </li>
+  </ul>
+</div>

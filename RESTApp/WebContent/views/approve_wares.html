@@ -1,0 +1,13 @@
+<div class="content">
+  <h1>Ware approval page for user {{merchantUser.username}}</h1>
+  <ul>
+    <li ng-repeat="ware in merchantUser.photos | orderBy:ware.name" ng-show="ware.approved==false">
+      <img ng-src="{{ware.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
+      <h3 style="margin-left: 12px">Name: {{ware.name}}</h3>
+      <h3 style="margin-left: 12px">Category: {{ware.category}}</h3>
+      <h3 style="margin-left: 12px">Description: {{ware.description}}</h3>
+      <h3 style="margin-left: 12px">Place taken: {{ware.location}}</h3>
+      <button style="float:right; margin-left: 12px; background-color:CornflowerBlue; color:white;" ng-click="previewWareOGSize(ware)">Preview ware in original size</button>
+    </li>
+  </ul>
+</div>

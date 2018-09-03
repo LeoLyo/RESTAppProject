@@ -62,6 +62,10 @@ webRestApp.run(function($rootScope){
           price:0
         }
       ]
+    },
+    Global:{
+      peasantsAndMerchants:[],
+      ogImageBA:""
     }
   };
   console.log('run rootscope: '+'username: '+$rootScope.Singleton.YouUser.username+'|password: '+$rootScope.Singleton.YouUser.password+'|uType: '+$rootScope.Singleton.YouUser.uType);
@@ -178,6 +182,14 @@ webRestApp.config(['$routeProvider',function($routeProvider){
   .when('/photograph_auctioned',{
     templateUrl: 'views/photograph_auctioned.html',
     controller: 'PhotographAuctionedController'
+  })
+  .when('/approve_wares/:merchant_waiting_for_ware_approval',{
+    templateUrl: 'views/approve_wares.html',
+    controller: 'ApproveWaresController'
+  })
+  .when('/ware_og_size/:ownerOfImage',{
+    templateUrl:'views/ware_og_size.html',
+    controller: 'WareOGSizeController'
   })
   .otherwise({
     redirectTo:'/home'
@@ -929,7 +941,64 @@ webRestApp.controller('WhoToTestController', ['$scope','$rootScope','$location',
 
 webRestApp.controller('WhosePicsToApproveController', ['$scope','$http','$rootScope','userConfig','$location', function($scope, $http, $rootScope, userConfig, $location){
 
+
+  $scope.photosToApprove = function(merchant){
+    var result=0;
+    for(var i=0;i<merchant.photos.length;i++){
+      if(merchant.photos[i].approved==false){
+        result++;
+      }
+    }
+    return result;
+  }
+
+  $scope.seeWaresOfMerchant = function(merchant){
+    var path = "/approve_wares/"+merchant.username;
+    $location.path(path);
+  }
+
+  $scope.init = function(){
+    userConfig.getAllUsersb().then(function(response){
+      $rootScope.Singleton.Global.peasantsAndMerchants=response.data;
+    });
+  }
+
+  $scope.init();
 }]);
+
+
+webRestApp.controller('ApproveWaresController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.tempMerchant = {
+    username: $routeParams.merchant_waiting_for_ware_approval,
+    password: "temp",
+    uType: "1"
+  };
+  console.log("Merchant: " + $scope.tempMerchant.username);
+  $scope.merchantUser="";
+  var formatedUser = angular.toJson($scope.tempMerchant);
+  userConfig.findUser(formatedUser).then(function(response, status){
+    $scope.merchantUser = response.data;
+    console.log("Foud merchant: " + $scope.merchantUser.username + " | " + $scope.merchantUser.photos.length);
+  });
+
+  $scope.previewWareOGSize = function(ware){
+    var path="/ware_og_size/"+$scope.merchantUser.username;
+    $rootScope.Singleton.Global.ogImageBA=ware;
+    console.log("HECK YEAH CLOUD ME MORE: " + $rootScope.Singleton.Global.ogImageBA.name + ", " + $rootScope.Singleton.Global.ogImageBA.byteArray);
+    $location.path(path);
+  }
+}]);
+
+webRestApp.controller('WareOGSizeController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
+  $scope.backtraceStep = function(){
+    path='/approve_wares/'+$routeParams.ownerOfImage;
+    console.log("Checkin path: " + path);
+    $location.path(path);
+    $rootScope.Singleton.Global.ogImageBA="";
+    console.log("Backtraced successfully!");
+  }
+}]);
+
 
 webRestApp.controller('GradeTestController', ['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
   $scope.tempPeasant = {
@@ -1232,17 +1301,48 @@ webRestApp.controller('PhotographAuctionedController',['$scope','$http','$rootSc
 
 webRestApp.controller('YourAuctionPageController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){
   $scope.rakometer=false;
-  $scope.calculateApprovedWares = function(){
-    var result=0;
+  $scope.approvedWares = 0;
+  $scope.notApprovedWares = 0;
+  console.log("Photos array size: " + $rootScope.Singleton.YouUser.photos.length);
+  $scope.init = function(){
     for(var i=0;i<$rootScope.Singleton.YouUser.photos.length;i++){
-      if($rootScope.Singleton.YouUser[i].approved==true){
-        result++;
+      if($rootScope.Singleton.YouUser.photos[i].approved==true){
+        $scope.approvedWares++;
+        console.log("A");
       }
-      return result;
+      else{
+        console.log("NA");
+        $scope.notApprovedWares++;
+        console.log("LA: " + $scope.notApprovedWares);
+      }
     }
   }
-  $scope.approvedWares = $scope.calculateApprovedWares();
-  $scope.imageMessage="Approved wares: " + $scope.approvedWares +", meanwhile wares awaiting for approval: " + ($rootScope.Singleton.YouUser.photos.size - $scope.approvedWares);
+  $scope.isImageApproved = function(photograph){
+    if(photograph.approved==true){
+      return "Approved";
+    }
+    else{
+      return "Not approved";
+    }
+  }
+
+  $scope.removeImage = function(image){
+    if(image.approved==true){
+      $scope.approvedWares--;
+    }else{
+      $scope.notApprovedWares--;
+    }
+    var indexRemovedImage = $rootScope.Singleton.YouUser.photos.indexOf(image);
+    $rootScope.Singleton.YouUser.photos.splice(indexRemovedImage,1);
+
+
+
+    }
+
+
+
+
+  $scope.init();
 }]);
 
 webRestApp.controller('InsertCreditCardController',['$scope','$http','$rootScope','userConfig','$location', '$routeParams', function($scope, $http, $rootScope, userConfig, $location, $routeParams){

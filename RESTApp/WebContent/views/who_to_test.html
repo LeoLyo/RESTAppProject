@@ -1,6 +1,8 @@
 <div class="content">
-  <li ng-repeat="peasant in Singleton.Testing.usersWaitingForGrading | orderBy: 'username'">
-    <h3>{{peasant.username}}</h3>
-    <button style="float:right;" ng-click="gradeSelectedPeasant(peasant)"> Grade </button>
+  <ul>
+    <li ng-repeat="peasant in Singleton.Testing.usersWaitingForGrading | orderBy: 'username'">
+      <h3>{{peasant.username}}</h3>
+      <button style="float:right;" ng-click="gradeSelectedPeasant(peasant)"> Grade </button>
    </li>
+ </ul>
 </div>

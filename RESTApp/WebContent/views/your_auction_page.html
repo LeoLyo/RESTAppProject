@@ -1,15 +1,12 @@
 <div class="content">
   <h1>Your personal auction page</h1>
-  <h4>{{imageMessage}}</h4>
+  <h4>Approved wares: {{approvedWares}}, while not approved wares: {{notApprovedWares}}</h4>
   <ol id="picture-list">
     <li ng-repeat="file in Singleton.YouUser.photos">
       <img ng-src="{{file.byteArray}}" style="margin: -12px 0 0; float: left; height: 50px; width:50px;"/>
-      <h3>{{file.name}}</h3>
-      <h3>{{file.resolution}}</h3>
-        <select size="2" class="selectGradeDrop" ng-model="file.approved" id="gradesEvolve" ng-disabled="Singleton.YouUser.uType!=2 || Singleton.YouUser.uType!=3">
-          <option ng-repeat="option in Singleton.Preparations.approveStatuses" ng-value="option.value">{{option.name}}</option>
-        </select>
+      <h3 style="margin-left: 12px">{{file.name}}</h3>
       <div class="remove" ng-click="removeImage(file)">x</div>
+      <h4 style="color: DarkViolet; margin-left: 12px float:right;">{{isImageApproved(file)}}</h4>
     </li>
   </ol>
 </div>

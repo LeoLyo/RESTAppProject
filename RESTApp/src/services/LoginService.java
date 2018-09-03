@@ -340,7 +340,7 @@ public class LoginService {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response findUser(User us, @Context HttpServletRequest request) {
 		BasicUserDAO dao = (BasicUserDAO) ctx.getAttribute("userDAO");
-		System.out.println("What is wrong: " + us.getUsername());
+		System.out.println("What is wrong [nothing, just so you know, friend]: " + us.getUsername());
 		BasicUser target = dao.find(us.getUsername());
 
 		if (target == null) {
